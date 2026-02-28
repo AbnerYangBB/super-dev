@@ -1,0 +1,23 @@
+{
+  "profile": "codex-ios",
+  "actions": [
+    {
+      "id": "agents",
+      "src": "ios/codex/AGENTS.md",
+      "target": "agents",
+      "strategy": "append_block"
+    },
+    {
+      "id": "codex-config",
+      "src": "ios/codex/config.toml",
+      "target": "codex_config",
+      "strategy": "merge_toml_keys"
+    },
+    {
+      "id": "ios-skills",
+      "src": "ios/skills",
+      "target": "skills_dir",
+      "strategy": "sync_additive_dir"
+    }
+  ]
+}

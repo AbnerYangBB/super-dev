@@ -1,0 +1,30 @@
+model = "gpt-5.3-codex"
+
+[features]
+multi_agent = true
+
+[agents]
+max_threads = 6
+max_depth = 2
+
+[mcp_servers.sequential-thinking]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+
+[mcp_servers.context7]
+command = "npx"
+args = ["-y", "@upstash/context7-mcp"]
+
+[mcp_servers.serena]
+command = "uvx"
+args = ["--from", "git+https://github.com/oraios/serena", "serena", "start-mcp-server", "--context", "codex"]
+
+[mcp_servers.XcodeBuildMCP]
+command = "npx"
+enabled = false
+args = ["-y", "xcodebuildmcp@latest", "mcp"]
+
+[mcp_servers.firebase]
+command = "npx"
+enabled = false
+args = ["-y", "firebase-tools@latest", "mcp"]

@@ -16,7 +16,7 @@
 在目标项目中，让 AI 执行：
 
 ```text
-Fetch and follow instructions from <RAW_BASE_URL>/common/install/ROLLBACK.md and rollback latest transaction
+Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/ROLLBACK.md and rollback latest transaction
 ```
 
 ## Rollback latest

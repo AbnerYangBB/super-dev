@@ -22,11 +22,8 @@
 在目标项目中，让 AI 执行：
 
 ```text
-Fetch and follow instructions from <RAW_BASE_URL>/common/install/INSTALL.md
+Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md
 ```
-
-`<RAW_BASE_URL>` 示例：
-`https://raw.githubusercontent.com/<owner>/<repo>/main`
 
 ## Execution Commands
 在目标项目根目录执行：
@@ -39,7 +36,7 @@ PROJECT_ROOT="$(pwd)"
 
 mkdir -p "$(dirname "$TEMPLATE_DIR")"
 if [ ! -d "$TEMPLATE_DIR/.git" ]; then
-  git clone --depth=1 <TEMPLATE_REPO_URL> "$TEMPLATE_DIR"
+  git clone --depth=1 https://github.com/AbnerYangBB/super-dev.git "$TEMPLATE_DIR"
 else
   git -C "$TEMPLATE_DIR" pull --ff-only
 fi
@@ -50,9 +47,6 @@ python3 "$TEMPLATE_DIR/common/install/scripts/portable_apply.py" \
   --profile codex-ios \
   --namespace super-dev
 ```
-
-`<TEMPLATE_REPO_URL>` 示例：
-`https://github.com/<owner>/<repo>.git`
 
 ## Expected Output
 成功时应输出 JSON，包含：
@@ -69,5 +63,5 @@ python3 "$TEMPLATE_DIR/common/install/scripts/portable_apply.py" \
 安装完成后，可执行：
 
 ```text
-Fetch and follow instructions from <RAW_BASE_URL>/common/install/ROLLBACK.md
+Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/ROLLBACK.md
 ```

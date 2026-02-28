@@ -25,6 +25,17 @@
 Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md
 ```
 
+## Private Repo Fallback
+如果上面的 `raw.githubusercontent.com` 返回 `404`（私有仓库常见），先拉取模板仓库再让 AI 读取本地文档：
+
+```bash
+git clone --depth=1 git@github.com:AbnerYangBB/super-dev.git .codex/portable/template/super-dev
+```
+
+```text
+Read and follow instructions from .codex/portable/template/super-dev/common/install/INSTALL.md
+```
+
 ## Execution Commands
 在目标项目根目录执行：
 

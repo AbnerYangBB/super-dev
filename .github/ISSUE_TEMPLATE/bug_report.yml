@@ -1,0 +1,24 @@
+name: Bug Report
+description: 报告安装/回退或文档行为问题
+title: "bug: "
+labels: [bug]
+body:
+  - type: textarea
+    id: desc
+    attributes:
+      label: 问题描述
+      description: 发生了什么，预期是什么
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      description: 请给出可复现步骤
+    validations:
+      required: true
+  - type: textarea
+    id: env
+    attributes:
+      label: 环境信息
+      description: OS、Python 版本、仓库分支/commit

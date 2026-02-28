@@ -10,6 +10,7 @@
 1. `profile`：默认 `codex-ios`。
 2. `namespace`：默认 `super-dev`。
 3. `project_root`：默认当前目录。
+4. `SUPER_DEV_HOME`：可选，默认 `$HOME/.super-dev`。
 
 ## Hard Rules
 1. 仅允许修改 AI 配置文件，禁止改动业务代码。
@@ -29,11 +30,19 @@ Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB
 如果上面的 `raw.githubusercontent.com` 返回 `404`（私有仓库常见），先拉取模板仓库再让 AI 读取本地文档：
 
 ```bash
-git clone --depth=1 git@github.com:AbnerYangBB/super-dev.git .codex/portable/template/super-dev
+SUPER_DEV_HOME="${SUPER_DEV_HOME:-$HOME/.super-dev}"
+TEMPLATE_DIR="$SUPER_DEV_HOME/templates/super-dev"
+
+mkdir -p "$(dirname "$TEMPLATE_DIR")"
+if [ ! -d "$TEMPLATE_DIR/.git" ]; then
+  git clone --depth=1 git@github.com:AbnerYangBB/super-dev.git "$TEMPLATE_DIR"
+else
+  git -C "$TEMPLATE_DIR" pull --ff-only
+fi
 ```
 
 ```text
-Read and follow instructions from .codex/portable/template/super-dev/common/install/INSTALL.md
+Read and follow instructions from $HOME/.super-dev/templates/super-dev/common/install/INSTALL.md
 ```
 
 ## Execution Commands
@@ -42,7 +51,8 @@ Read and follow instructions from .codex/portable/template/super-dev/common/inst
 ```bash
 set -euo pipefail
 
-TEMPLATE_DIR=".codex/portable/template/super-dev"
+SUPER_DEV_HOME="${SUPER_DEV_HOME:-$HOME/.super-dev}"
+TEMPLATE_DIR="$SUPER_DEV_HOME/templates/super-dev"
 PROJECT_ROOT="$(pwd)"
 
 mkdir -p "$(dirname "$TEMPLATE_DIR")"

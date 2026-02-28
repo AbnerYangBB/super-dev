@@ -6,6 +6,9 @@
 ## Inputs
 1. `txn_id`：可选，默认 `latest`。
 2. `project_root`：默认当前目录。
+3. `SUPER_DEV_HOME`：可选，默认 `$HOME/.super-dev`。
+
+模板默认目录：`$HOME/.super-dev/templates/super-dev`。
 
 ## Hard Rules
 1. 回退仅根据 `.codex/portable/state.json` 与备份执行。
@@ -25,7 +28,8 @@ Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB
 ```bash
 set -euo pipefail
 
-TEMPLATE_DIR=".codex/portable/template/super-dev"
+SUPER_DEV_HOME="${SUPER_DEV_HOME:-$HOME/.super-dev}"
+TEMPLATE_DIR="$SUPER_DEV_HOME/templates/super-dev"
 PROJECT_ROOT="$(pwd)"
 
 python3 "$TEMPLATE_DIR/common/install/scripts/portable_rollback.py" \
@@ -37,7 +41,8 @@ python3 "$TEMPLATE_DIR/common/install/scripts/portable_rollback.py" \
 ```bash
 set -euo pipefail
 
-TEMPLATE_DIR=".codex/portable/template/super-dev"
+SUPER_DEV_HOME="${SUPER_DEV_HOME:-$HOME/.super-dev}"
+TEMPLATE_DIR="$SUPER_DEV_HOME/templates/super-dev"
 PROJECT_ROOT="$(pwd)"
 TXN_ID="<txn-id>"
 

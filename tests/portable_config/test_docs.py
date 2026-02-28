@@ -12,6 +12,10 @@ class TestInstallDocs(unittest.TestCase):
         self.assertIn("仅允许修改 AI 配置文件", text)
         self.assertNotIn("<RAW_BASE_URL>", text)
         self.assertNotIn("<TEMPLATE_REPO_URL>", text)
+        self.assertIn("SUPER_DEV_HOME", text)
+        self.assertIn("$HOME/.super-dev", text)
+        self.assertIn(".super-dev/templates/super-dev", text)
+        self.assertNotIn(".codex/portable/template/super-dev", text)
         self.assertIn(
             "https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md",
             text,
@@ -24,6 +28,10 @@ class TestInstallDocs(unittest.TestCase):
         text = (REPO_ROOT / "common" / "install" / "ROLLBACK.md").read_text(encoding="utf-8")
         self.assertIn("latest", text)
         self.assertIn("portable_rollback.py", text)
+        self.assertIn("SUPER_DEV_HOME", text)
+        self.assertIn("$HOME/.super-dev", text)
+        self.assertIn(".super-dev/templates/super-dev", text)
+        self.assertNotIn(".codex/portable/template/super-dev", text)
         self.assertNotIn("<RAW_BASE_URL>", text)
         self.assertIn(
             "https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/ROLLBACK.md",

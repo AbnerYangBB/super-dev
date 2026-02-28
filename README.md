@@ -26,12 +26,26 @@ Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB
 当 `raw.githubusercontent.com` 无法访问（例如私有仓库）时，先拉取模板再让 AI 读取本地安装文档：
 
 ```bash
-git clone --depth=1 git@github.com:AbnerYangBB/super-dev.git .codex/portable/template/super-dev
+SUPER_DEV_HOME="${SUPER_DEV_HOME:-$HOME/.super-dev}"
+TEMPLATE_DIR="$SUPER_DEV_HOME/templates/super-dev"
+
+mkdir -p "$(dirname "$TEMPLATE_DIR")"
+if [ ! -d "$TEMPLATE_DIR/.git" ]; then
+  git clone --depth=1 git@github.com:AbnerYangBB/super-dev.git "$TEMPLATE_DIR"
+else
+  git -C "$TEMPLATE_DIR" pull --ff-only
+fi
 ```
 
 ```text
-Read and follow instructions from .codex/portable/template/super-dev/common/install/INSTALL.md
+Read and follow instructions from $HOME/.super-dev/templates/super-dev/common/install/INSTALL.md
 ```
+
+## 迁移说明
+
+- 新版本模板缓存默认放在 `SUPER_DEV_HOME`（默认 `$HOME/.super-dev`）下。
+- 历史遗留目录 `.codex/portable/template/super-dev` 可手动删除，避免被误提交。
+- 项目内 `.codex/portable/state|backups|history|conflicts` 仍会保留，用于安装事务回退。
 
 ## 回退
 

@@ -14,6 +14,10 @@ class TestRepoBasics(unittest.TestCase):
         self.assertIn("可能存在风险", text)
         self.assertIn("仅支持 iOS 工程的 Codex 配置", text)
         self.assertIn("Fetch and follow instructions", text)
+        self.assertIn("SUPER_DEV_HOME", text)
+        self.assertIn("$HOME/.super-dev/templates/super-dev", text)
+        self.assertIn("迁移说明", text)
+        self.assertIn(".codex/portable/template/super-dev", text)
 
     def test_common_github_community_files_exist(self):
         self.assertTrue((REPO_ROOT / "CONTRIBUTING.md").exists())
@@ -29,6 +33,7 @@ class TestRepoBasics(unittest.TestCase):
         self.assertIn(".DS_Store", text)
         self.assertIn("__pycache__/", text)
         self.assertIn("*.pyc", text)
+        self.assertIn(".codex/portable/template/", text)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,7 @@
 # super-dev
 
 可移植的 AI 工程配置仓库，当前聚焦 iOS 开发场景。
+项目本身由AI自动生成. 使用 https://github.com/obra/superpowers skills框架(建议大家也安装).
 
 ## 状态声明
 

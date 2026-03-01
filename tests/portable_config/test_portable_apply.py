@@ -29,7 +29,7 @@ class TestPortableApply(unittest.TestCase):
     def tearDown(self) -> None:
         self.tmp.cleanup()
 
-    def _run_apply(self, extra_args=None):
+    def _run_apply(self, profile="codex-ios", namespace="super-dev", extra_args=None):
         script = REPO_ROOT / "common" / "install" / "scripts" / "portable_apply.py"
         args = [
             "python3",
@@ -39,19 +39,24 @@ class TestPortableApply(unittest.TestCase):
             "--template-root",
             str(REPO_ROOT),
             "--profile",
-            "codex-ios",
+            profile,
             "--namespace",
-            "super-dev",
+            namespace,
         ]
         if extra_args:
             args.extend(extra_args)
         return subprocess.run(args, check=False, capture_output=True, text=True)
 
     def test_profile_and_manifest_load_successfully(self):
-        profile, manifest = load_profile_and_manifest(REPO_ROOT, "codex-ios")
-        self.assertEqual(profile["profile"], "codex-ios")
-        self.assertEqual(manifest["profile"], "codex-ios")
-        self.assertGreaterEqual(len(manifest["actions"]), 3)
+        codex_profile, codex_manifest = load_profile_and_manifest(REPO_ROOT, "codex-ios")
+        self.assertEqual(codex_profile["profile"], "codex-ios")
+        self.assertEqual(codex_manifest["profile"], "codex-ios")
+        self.assertGreaterEqual(len(codex_manifest["actions"]), 3)
+
+        claude_profile, claude_manifest = load_profile_and_manifest(REPO_ROOT, "claude-ios")
+        self.assertEqual(claude_profile["profile"], "claude-ios")
+        self.assertEqual(claude_manifest["profile"], "claude-ios")
+        self.assertGreaterEqual(len(claude_manifest["actions"]), 2)
 
     def test_apply_creates_transaction_state_and_files(self):
         result = self._run_apply()
@@ -97,6 +102,59 @@ class TestPortableApply(unittest.TestCase):
         self.assertEqual(merged["model"], "custom-model")
         self.assertEqual(merged["features"]["multi_agent"], False)
         self.assertIn("mcp_servers", merged)
+
+    def test_apply_claude_profile_creates_files_and_merges_existing_json_settings(self):
+        settings_path = self.project_root / ".claude" / "settings.json"
+        settings_path.parent.mkdir(parents=True, exist_ok=True)
+        settings_path.write_text(
+            json.dumps(
+                {
+                    "permissions": {
+                        "allow": ["Bash(xcodebuild *)"],
+                    }
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+        result = self._run_apply(profile="claude-ios")
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "ok")
+        self.assertEqual(payload["conflicts"], 0)
+
+        claude_md = self.project_root / "CLAUDE.md"
+        self.assertTrue(claude_md.exists())
+        claude_text = claude_md.read_text(encoding="utf-8")
+        self.assertIn("BEGIN SUPER-DEV MANAGED BLOCK", claude_text)
+
+        merged = json.loads(settings_path.read_text(encoding="utf-8"))
+        self.assertEqual(merged["permissions"]["allow"], ["Bash(xcodebuild *)"])
+        self.assertIn("deny", merged["permissions"])
+
+    def test_apply_claude_profile_records_conflict_for_invalid_existing_json(self):
+        settings_path = self.project_root / ".claude" / "settings.json"
+        settings_path.parent.mkdir(parents=True, exist_ok=True)
+        settings_path.write_text("{invalid-json", encoding="utf-8")
+
+        result = self._run_apply(profile="claude-ios")
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "ok")
+        self.assertEqual(payload["conflicts"], 1)
+        self.assertEqual(settings_path.read_text(encoding="utf-8"), "{invalid-json")
+
+        state_path = self.project_root / ".codex" / "portable" / "state.json"
+        state = json.loads(state_path.read_text(encoding="utf-8"))
+        txn = state["transactions"][0]
+        self.assertEqual(txn["profile"], "claude-ios")
+        self.assertEqual(txn["conflicts"][0]["path"], ".claude/settings.json")
+        self.assertEqual(txn["conflicts"][0]["reason"], "target_json_invalid")
 
     def test_apply_failure_rolls_back_partial_changes(self):
         original_agents = "# Existing AGENTS\n\nUser content\n"

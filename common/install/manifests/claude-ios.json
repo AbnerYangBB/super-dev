@@ -1,0 +1,17 @@
+{
+  "profile": "claude-ios",
+  "actions": [
+    {
+      "id": "claude-memory",
+      "src": "ios/claude/CLAUDE.md",
+      "target": "claude_md",
+      "strategy": "append_block"
+    },
+    {
+      "id": "claude-settings",
+      "src": "ios/claude/settings.json",
+      "target": "claude_settings",
+      "strategy": "merge_json_keys"
+    }
+  ]
+}

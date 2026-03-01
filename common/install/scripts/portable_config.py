@@ -260,6 +260,78 @@ def _merge_toml_keys(
     )
 
 
+def _merge_json_keys(
+    *,
+    action_id: str,
+    src: pathlib.Path,
+    dst: pathlib.Path,
+    project_root: pathlib.Path,
+    backup_root: pathlib.Path,
+    conflict_root: pathlib.Path,
+    txn_changes: list[dict[str, Any]],
+    txn_conflicts: list[dict[str, Any]],
+) -> None:
+    src_text = src.read_text(encoding="utf-8")
+    try:
+        src_data = json.loads(src_text)
+    except json.JSONDecodeError as exc:
+        raise PortableConfigError(f"Source JSON invalid: {src}") from exc
+
+    if not isinstance(src_data, dict):
+        raise PortableConfigError(f"Source JSON root must be object: {src}")
+
+    rel_path = str(dst.relative_to(project_root))
+
+    if not dst.exists():
+        _ensure_parent(dst)
+        dst.write_text(json.dumps(src_data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        txn_changes.append(
+            {
+                "path": rel_path,
+                "operation": "created",
+                "backup": None,
+                "action_id": action_id,
+            }
+        )
+        return
+
+    target_text = dst.read_text(encoding="utf-8")
+    try:
+        target_data = json.loads(target_text)
+    except json.JSONDecodeError:
+        conflict_file = conflict_root / rel_path.replace("/", "__")
+        conflict_file.parent.mkdir(parents=True, exist_ok=True)
+        conflict_file.write_text(json.dumps(src_data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        txn_conflicts.append(
+            {
+                "path": rel_path,
+                "reason": "target_json_invalid",
+                "suggested_source": str(conflict_file.relative_to(project_root)),
+            }
+        )
+        return
+
+    if not isinstance(target_data, dict):
+        raise PortableConfigError(f"Target JSON root must be object: {rel_path}")
+
+    merged = copy.deepcopy(target_data)
+    changed = _merge_missing(merged, src_data)
+    if not changed:
+        return
+
+    backup_rel = _backup_file(project_root=project_root, file_path=dst, backup_root=backup_root)
+    dumped = json.dumps(merged, ensure_ascii=False, indent=2) + "\n"
+    dst.write_text(dumped, encoding="utf-8")
+    txn_changes.append(
+        {
+            "path": rel_path,
+            "operation": "updated",
+            "backup": backup_rel,
+            "action_id": action_id,
+        }
+    )
+
+
 def _sync_additive_dir(
     *,
     action_id: str,
@@ -377,6 +449,17 @@ def apply_profile(
                     project_root=project_root,
                     backup_root=backup_root,
                     txn_changes=txn_changes,
+                )
+            elif strategy == "merge_json_keys":
+                _merge_json_keys(
+                    action_id=action_id,
+                    src=src,
+                    dst=dst,
+                    project_root=project_root,
+                    backup_root=backup_root,
+                    conflict_root=conflict_root,
+                    txn_changes=txn_changes,
+                    txn_conflicts=txn_conflicts,
                 )
             else:
                 raise PortableConfigError(f"Unsupported strategy: {strategy}")

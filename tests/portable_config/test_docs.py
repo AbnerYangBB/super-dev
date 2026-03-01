@@ -23,6 +23,7 @@ class TestInstallDocs(unittest.TestCase):
         self.assertIn("https://github.com/AbnerYangBB/super-dev.git", text)
         self.assertIn("Private Repo Fallback", text)
         self.assertIn("git@github.com:AbnerYangBB/super-dev.git", text)
+        self.assertIn("claude-ios", text)
 
     def test_rollback_doc_contains_latest_flow(self):
         text = (REPO_ROOT / "common" / "install" / "ROLLBACK.md").read_text(encoding="utf-8")

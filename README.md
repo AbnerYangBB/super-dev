@@ -11,7 +11,7 @@
 
 ## 当前支持范围
 
-- 仅支持 iOS 工程的 Codex 配置。
+- 仅支持 iOS 工程的 Codex / Claude 配置。
 - 已提供安装与回退能力（事务状态记录 + 回退脚本）。
 
 ## 快速安装（公开仓库场景）
@@ -58,6 +58,7 @@ Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB
 
 - `common/install/`: 通用安装入口、profile/manifest、安装与回退脚本。
 - `ios/codex/`: iOS Codex 配置模板。
+- `ios/claude/`: iOS Claude 配置模板。
 - `ios/skills/`: iOS 相关 skills 模板。
 - `tests/`: 安装/回退与文档约束测试。
 

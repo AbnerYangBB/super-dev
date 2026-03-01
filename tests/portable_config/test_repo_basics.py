@@ -12,7 +12,7 @@ class TestRepoBasics(unittest.TestCase):
         self.assertIn("super-dev", text)
         self.assertIn("目前仅用于自用", text)
         self.assertIn("可能存在风险", text)
-        self.assertIn("仅支持 iOS 工程的 Codex 配置", text)
+        self.assertIn("仅支持 iOS 工程的 Codex / Claude 配置", text)
         self.assertIn("Fetch and follow instructions", text)
         self.assertIn("SUPER_DEV_HOME", text)
         self.assertIn("$HOME/.super-dev/templates/super-dev", text)

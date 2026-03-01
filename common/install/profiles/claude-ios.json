@@ -1,0 +1,14 @@
+{
+  "profile": "claude-ios",
+  "description": "Claude Code iOS template target mapping",
+  "targets": {
+    "claude_md": "CLAUDE.md",
+    "claude_settings": ".claude/settings.json"
+  },
+  "state": {
+    "state_file": ".codex/portable/state.json",
+    "backup_dir": ".codex/portable/backups",
+    "history_dir": ".codex/portable/history",
+    "conflicts_dir": ".codex/portable/conflicts"
+  }
+}

@@ -13,46 +13,36 @@
 
 - 仅支持 iOS 工程的 Codex / Claude 配置。
 - 已提供安装与回退能力（事务状态记录 + 回退脚本）。
-- `claude-ios` 会下发 `CLAUDE.md`、`.claude/settings.json`、`.mcp.json`、`.claude/skills/super-dev/**`。
+- `codex-ios` 下发：`AGENTS.md`、`.codex/config.toml`、`.agents/skills/super-dev/**`。
+- `claude-ios` 下发：`CLAUDE.md`、`.claude/settings.json`、`.mcp.json`、`.claude/skills/super-dev/**`。
 
-## 快速安装（公开仓库场景）
+## 快速安装（按 AI 工具）
 
+### Codex
 给 AI 的提示词：
 
 ```text
-Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md
+Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile codex-ios in current project
 ```
 
-## 私有仓库回退方案
-
-当 `raw.githubusercontent.com` 无法访问（例如私有仓库）时，先拉取模板再让 AI 读取本地安装文档：
-
-```bash
-SUPER_DEV_HOME="${SUPER_DEV_HOME:-$HOME/.super-dev}"
-TEMPLATE_DIR="$SUPER_DEV_HOME/templates/super-dev"
-
-mkdir -p "$(dirname "$TEMPLATE_DIR")"
-if [ ! -d "$TEMPLATE_DIR/.git" ]; then
-  git clone --depth=1 git@github.com:AbnerYangBB/super-dev.git "$TEMPLATE_DIR"
-else
-  git -C "$TEMPLATE_DIR" pull --ff-only
-fi
-```
+### Claude Code
+给 AI 的提示词：
 
 ```text
-Read and follow instructions from $HOME/.super-dev/templates/super-dev/common/install/INSTALL.md
+Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile claude-ios in current project
 ```
 
 ## 迁移说明
 
 - 新版本模板缓存默认放在 `SUPER_DEV_HOME`（默认 `$HOME/.super-dev`）下。
+- 模板目录：`$HOME/.super-dev/templates/super-dev`。
 - 历史遗留目录 `.codex/portable/template/super-dev` 可手动删除，避免被误提交。
 - 项目内 `.codex/portable/state|backups|history|conflicts` 仍会保留，用于安装事务回退。
 
 ## 回退
 
 ```text
-Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/ROLLBACK.md
+Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/ROLLBACK.md and rollback latest transaction
 ```
 
 ## 仓库结构

@@ -24,10 +24,14 @@
 9. Claude skills 仅写入 `.claude/skills/<namespace>/`，不触碰其他命名空间。
 
 ## One-Click (AI)
-在目标项目中，让 AI 执行：
+在目标项目中，让 AI 执行以下短提示词（推荐）：
 
 ```text
-Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md
+Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile codex-ios in current project
+```
+
+```text
+Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile claude-ios in current project
 ```
 
 ## Private Repo Fallback

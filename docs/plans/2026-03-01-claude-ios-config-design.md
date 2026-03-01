@@ -49,14 +49,15 @@
 
 ## 4. 选型与范围
 
-采用方案 B，首版只做：
+采用方案 B（扩展），首版做：
 1. `CLAUDE.md`：受管区块追加（`append_block`）。
 2. `.claude/settings.json`：只补缺失 key（新策略 `merge_json_keys`）。
-3. 新增 `claude-ios` profile/manifest，并在文档中公开可选 profile。
+3. `.mcp.json`：只补缺失 key（`merge_json_keys`），下发项目级 MCP 服务器配置。
+4. `.claude/skills/super-dev/**`：同步 iOS skills 列表与脚本（`sync_additive_dir`）。
+5. 新增 `claude-ios` profile/manifest，并在文档中公开可选 profile。
 
 暂不做：
-1. `.mcp.json` 默认下发。
-2. `.claude/agents` 与命令集下发。
+1. `.claude/agents` 与命令集下发。
 
 ## 5. 关键设计
 
@@ -71,6 +72,8 @@
 
 1. `ios/claude/CLAUDE.md -> CLAUDE.md`
 2. `ios/claude/settings.json -> .claude/settings.json`
+3. `ios/claude/mcp.json -> .mcp.json`
+4. `ios/skills/** -> .claude/skills/super-dev/**`
 
 ### 5.3 回退行为
 
@@ -81,5 +84,7 @@
 
 1. `portable_apply.py --profile claude-ios` 可成功安装目标文件。
 2. 既有 `.claude/settings.json` 的用户 key 不被覆盖。
-3. 目标 settings 非法 JSON 时输出 conflict 且不中断安装。
-4. 全量测试通过。
+3. 既有 `.mcp.json` 的用户 key 不被覆盖，默认 MCP 服务器被补齐。
+4. 目标 settings 非法 JSON 时输出 conflict 且不中断安装。
+5. `.claude/skills/super-dev/**` 成功同步。
+6. 全量测试通过。

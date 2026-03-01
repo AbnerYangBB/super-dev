@@ -12,6 +12,18 @@
       "src": "ios/claude/settings.json",
       "target": "claude_settings",
       "strategy": "merge_json_keys"
+    },
+    {
+      "id": "claude-mcp",
+      "src": "ios/claude/mcp.json",
+      "target": "claude_mcp",
+      "strategy": "merge_json_keys"
+    },
+    {
+      "id": "claude-skills",
+      "src": "ios/skills",
+      "target": "claude_skills_dir",
+      "strategy": "sync_additive_dir"
     }
   ]
 }

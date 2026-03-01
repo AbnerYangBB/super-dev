@@ -4,7 +4,7 @@
 
 **Goal:** Add `claude-ios` profile support to portable installer with official-style project-level Claude Code config delivery.
 
-**Architecture:** Reuse manifest+profile pipeline. Add one new merge strategy `merge_json_keys` for non-destructive `.claude/settings.json` updates, and introduce `ios/claude` templates mapped by new `claude-ios` metadata.
+**Architecture:** Reuse manifest+profile pipeline. Add one new merge strategy `merge_json_keys` for non-destructive JSON updates, and introduce `ios/claude` templates (`CLAUDE.md`, `settings.json`, `mcp.json`) plus Claude skills sync to `.claude/skills/{namespace}`.
 
 **Tech Stack:** Python 3 (`json`, `pathlib`, `unittest`), Markdown docs, existing installer scripts.
 
@@ -20,7 +20,7 @@
 **Step 1: Write the failing tests**
 
 1. Assert `load_profile_and_manifest(REPO_ROOT, "claude-ios")` succeeds.
-2. Assert apply with `--profile claude-ios` creates `CLAUDE.md` and `.claude/settings.json`.
+2. Assert apply with `--profile claude-ios` creates `CLAUDE.md`、`.claude/settings.json`、`.mcp.json`、`.claude/skills/super-dev/**`.
 3. Assert existing `.claude/settings.json` keeps user keys and receives missing defaults.
 4. Assert README/INSTALL include `claude-ios`.
 
@@ -38,12 +38,13 @@ Expected: FAIL (missing metadata/template/docs).
 - Create: `common/install/manifests/claude-ios.json`
 - Create: `ios/claude/CLAUDE.md`
 - Create: `ios/claude/settings.json`
+- Create: `ios/claude/mcp.json`
 
 **Step 1: Add minimal implementation**
 
 1. Define targets for `CLAUDE.md` and `.claude/settings.json`.
-2. Define actions: `append_block` + `merge_json_keys`.
-3. Add safe default settings (permissions baseline).
+2. Define actions: `append_block` + `merge_json_keys` + `sync_additive_dir`.
+3. Add safe default settings (permissions baseline), MCP servers baseline, and skills sync mapping.
 
 **Step 2: Run tests**
 

@@ -3,7 +3,9 @@
   "description": "Claude Code iOS template target mapping",
   "targets": {
     "claude_md": "CLAUDE.md",
-    "claude_settings": ".claude/settings.json"
+    "claude_settings": ".claude/settings.json",
+    "claude_mcp": ".mcp.json",
+    "claude_skills_dir": ".claude/skills/{skill_namespace}"
   },
   "state": {
     "state_file": ".codex/portable/state.json",

@@ -105,12 +105,30 @@ class TestPortableApply(unittest.TestCase):
 
     def test_apply_claude_profile_creates_files_and_merges_existing_json_settings(self):
         settings_path = self.project_root / ".claude" / "settings.json"
+        mcp_path = self.project_root / ".mcp.json"
         settings_path.parent.mkdir(parents=True, exist_ok=True)
         settings_path.write_text(
             json.dumps(
                 {
                     "permissions": {
                         "allow": ["Bash(xcodebuild *)"],
+                    }
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        mcp_path.write_text(
+            json.dumps(
+                {
+                    "mcpServers": {
+                        "custom-server": {
+                            "type": "stdio",
+                            "command": "custom-mcp",
+                            "args": [],
+                        }
                     }
                 },
                 ensure_ascii=False,
@@ -135,6 +153,22 @@ class TestPortableApply(unittest.TestCase):
         merged = json.loads(settings_path.read_text(encoding="utf-8"))
         self.assertEqual(merged["permissions"]["allow"], ["Bash(xcodebuild *)"])
         self.assertIn("deny", merged["permissions"])
+
+        mcp_merged = json.loads(mcp_path.read_text(encoding="utf-8"))
+        self.assertIn("custom-server", mcp_merged["mcpServers"])
+        self.assertIn("sequential-thinking", mcp_merged["mcpServers"])
+        self.assertIn("context7", mcp_merged["mcpServers"])
+        self.assertIn("serena", mcp_merged["mcpServers"])
+
+        claude_skill = (
+            self.project_root
+            / ".claude"
+            / "skills"
+            / "super-dev"
+            / "xcode-builder"
+            / "SKILL.md"
+        )
+        self.assertTrue(claude_skill.exists())
 
     def test_apply_claude_profile_records_conflict_for_invalid_existing_json(self):
         settings_path = self.project_root / ".claude" / "settings.json"

@@ -27,7 +27,7 @@ class TestPortableRollback(unittest.TestCase):
     def tearDown(self) -> None:
         self.tmp.cleanup()
 
-    def _run_apply(self):
+    def _run_apply(self, profile="codex-ios"):
         script = REPO_ROOT / "common" / "install" / "scripts" / "portable_apply.py"
         args = [
             "python3",
@@ -37,7 +37,7 @@ class TestPortableRollback(unittest.TestCase):
             "--template-root",
             str(REPO_ROOT),
             "--profile",
-            "codex-ios",
+            profile,
             "--namespace",
             "super-dev",
         ]
@@ -80,6 +80,32 @@ class TestPortableRollback(unittest.TestCase):
         state_path = self.project_root / ".codex" / "portable" / "state.json"
         state = json.loads(state_path.read_text(encoding="utf-8"))
         self.assertTrue(state["transactions"][0]["rolled_back"])
+
+    def test_rollback_claude_apply_uses_claude_state(self):
+        apply_result = self._run_apply(profile="claude-ios")
+        self.assertEqual(apply_result.returncode, 0, msg=apply_result.stderr)
+
+        claude_state_path = self.project_root / ".claude" / "portable" / "state.json"
+        self.assertTrue(claude_state_path.exists())
+        self.assertFalse((self.project_root / ".codex" / "portable").exists())
+
+        rollback_result = self._run_rollback()
+        self.assertEqual(rollback_result.returncode, 0, msg=rollback_result.stderr)
+        payload = json.loads(rollback_result.stdout)
+        self.assertEqual(payload["state_file"], ".claude/portable/state.json")
+
+        state = json.loads(claude_state_path.read_text(encoding="utf-8"))
+        self.assertTrue(state["transactions"][0]["rolled_back"])
+
+        claude_skill = (
+            self.project_root
+            / ".claude"
+            / "skills"
+            / "super-dev"
+            / "xcode-builder"
+            / "SKILL.md"
+        )
+        self.assertFalse(claude_skill.exists())
 
 
 if __name__ == "__main__":

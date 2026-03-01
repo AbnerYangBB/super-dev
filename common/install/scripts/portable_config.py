@@ -16,6 +16,12 @@ class PortableConfigError(RuntimeError):
     """Raised when installer state or metadata is invalid."""
 
 
+STATE_FILE_CANDIDATES = (
+    ".codex/portable/state.json",
+    ".claude/portable/state.json",
+)
+
+
 def load_profile_and_manifest(template_root: pathlib.Path, profile_name: str) -> tuple[dict[str, Any], dict[str, Any]]:
     profile_path = template_root / "common" / "install" / "profiles" / f"{profile_name}.json"
     manifest_path = template_root / "common" / "install" / "manifests" / f"{profile_name}.json"
@@ -478,7 +484,7 @@ def apply_profile(
         shutil.rmtree(conflict_root, ignore_errors=True)
         _remove_empty_parents(backup_base, project_root)
         _remove_empty_parents(conflicts_base, project_root)
-        _remove_empty_parents(project_root / ".codex" / "portable", project_root)
+        _remove_empty_parents(state_path.parent, project_root)
 
         raise PortableConfigError(f"Apply failed at action '{current_action_id}': {exc}") from exc
 
@@ -514,6 +520,36 @@ def _latest_open_apply_transaction(state: dict[str, Any]) -> dict[str, Any] | No
         if txn.get("kind") == "apply" and not txn.get("rolled_back", False):
             return txn
     return None
+
+
+def _resolve_state_file_candidates(project_root: pathlib.Path) -> list[pathlib.Path]:
+    candidates: list[pathlib.Path] = []
+    for rel in STATE_FILE_CANDIDATES:
+        path = project_root / rel
+        if path.exists():
+            candidates.append(path)
+    return candidates
+
+
+def _select_latest_open_apply(
+    states_with_paths: list[tuple[pathlib.Path, dict[str, Any]]],
+) -> tuple[pathlib.Path, dict[str, Any], dict[str, Any]] | None:
+    winner: tuple[pathlib.Path, dict[str, Any], dict[str, Any]] | None = None
+
+    for state_path, state in states_with_paths:
+        txn = _latest_open_apply_transaction(state)
+        if txn is None:
+            continue
+
+        if winner is None:
+            winner = (state_path, state, txn)
+            continue
+
+        current = winner[2]
+        if str(txn.get("txn_id", "")) > str(current.get("txn_id", "")):
+            winner = (state_path, state, txn)
+
+    return winner
 
 
 def _remove_empty_parents(path: pathlib.Path, stop: pathlib.Path) -> None:
@@ -569,26 +605,37 @@ def rollback_transaction(
     txn_id: str | None = None,
 ) -> dict[str, Any]:
     project_root = project_root.resolve()
-    state_path = project_root / ".codex" / "portable" / "state.json"
-    history_dir = project_root / ".codex" / "portable" / "history"
+    state_paths = _resolve_state_file_candidates(project_root)
+    if not state_paths:
+        raise PortableConfigError("No rollback candidate found")
 
-    state = _load_state(state_path)
-    txns: list[dict[str, Any]] = state.get("transactions", [])
+    states_with_paths: list[tuple[pathlib.Path, dict[str, Any]]] = []
+    for state_path in state_paths:
+        states_with_paths.append((state_path, _load_state(state_path)))
 
-    target_txn: dict[str, Any] | None = None
+    selected: tuple[pathlib.Path, dict[str, Any], dict[str, Any]] | None = None
     if txn_id:
-        for txn in txns:
-            if txn.get("kind") == "apply" and txn.get("txn_id") == txn_id:
-                target_txn = txn
+        for state_path, state in states_with_paths:
+            txns: list[dict[str, Any]] = state.get("transactions", [])
+            for txn in txns:
+                if txn.get("kind") != "apply" or txn.get("txn_id") != txn_id:
+                    continue
+                if txn.get("rolled_back", False):
+                    raise PortableConfigError(f"Transaction already rolled back: {txn_id}")
+                selected = (state_path, state, txn)
                 break
-        if target_txn is None:
+            if selected is not None:
+                break
+        if selected is None:
             raise PortableConfigError(f"Transaction not found: {txn_id}")
-        if target_txn.get("rolled_back", False):
-            raise PortableConfigError(f"Transaction already rolled back: {txn_id}")
     else:
-        target_txn = _latest_open_apply_transaction(state)
-        if target_txn is None:
+        selected = _select_latest_open_apply(states_with_paths)
+        if selected is None:
             raise PortableConfigError("No rollback candidate found")
+
+    state_path, state, target_txn = selected
+    history_dir = state_path.parent / "history"
+    txns: list[dict[str, Any]] = state.get("transactions", [])
 
     restored, removed = _restore_changes(
         project_root=project_root,

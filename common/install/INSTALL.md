@@ -88,7 +88,9 @@ python3 "$TEMPLATE_DIR/common/install/scripts/portable_apply.py" \
 成功时应输出 JSON，包含：
 1. `status=ok`
 2. `txn_id`
-3. `state_file=.codex/portable/state.json`
+3. `state_file`（按 profile）：
+   - `codex-ios`: `.codex/portable/state.json`
+   - `claude-ios`: `.claude/portable/state.json`
 
 ## Installed Targets (codex-ios)
 1. `ios/codex/AGENTS.md -> AGENTS.md`

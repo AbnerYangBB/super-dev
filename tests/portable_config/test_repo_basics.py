@@ -19,6 +19,7 @@ class TestRepoBasics(unittest.TestCase):
         self.assertIn("迁移说明", text)
         self.assertIn(".codex/portable/template/super-dev", text)
         self.assertIn(".claude/skills", text)
+        self.assertIn(".claude/portable/state|backups|history|conflicts", text)
 
     def test_common_github_community_files_exist(self):
         self.assertTrue((REPO_ROOT / "CONTRIBUTING.md").exists())

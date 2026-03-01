@@ -8,9 +8,9 @@
     "claude_skills_dir": ".claude/skills/{skill_namespace}"
   },
   "state": {
-    "state_file": ".codex/portable/state.json",
-    "backup_dir": ".codex/portable/backups",
-    "history_dir": ".codex/portable/history",
-    "conflicts_dir": ".codex/portable/conflicts"
+    "state_file": ".claude/portable/state.json",
+    "backup_dir": ".claude/portable/backups",
+    "history_dir": ".claude/portable/history",
+    "conflicts_dir": ".claude/portable/conflicts"
   }
 }

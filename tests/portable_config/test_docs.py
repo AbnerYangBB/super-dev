@@ -26,6 +26,7 @@ class TestInstallDocs(unittest.TestCase):
         self.assertIn("claude-ios", text)
         self.assertIn(".mcp.json", text)
         self.assertIn(".claude/skills", text)
+        self.assertIn(".claude/portable/state.json", text)
 
     def test_rollback_doc_contains_latest_flow(self):
         text = (REPO_ROOT / "common" / "install" / "ROLLBACK.md").read_text(encoding="utf-8")
@@ -34,6 +35,7 @@ class TestInstallDocs(unittest.TestCase):
         self.assertIn("SUPER_DEV_HOME", text)
         self.assertIn("$HOME/.super-dev", text)
         self.assertIn(".super-dev/templates/super-dev", text)
+        self.assertIn(".claude/portable/state.json", text)
         self.assertNotIn(".codex/portable/template/super-dev", text)
         self.assertNotIn("<RAW_BASE_URL>", text)
         self.assertIn(

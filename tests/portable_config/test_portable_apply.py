@@ -144,6 +144,7 @@ class TestPortableApply(unittest.TestCase):
         payload = json.loads(result.stdout)
         self.assertEqual(payload["status"], "ok")
         self.assertEqual(payload["conflicts"], 0)
+        self.assertEqual(payload["state_file"], ".claude/portable/state.json")
 
         claude_md = self.project_root / "CLAUDE.md"
         self.assertTrue(claude_md.exists())
@@ -169,6 +170,7 @@ class TestPortableApply(unittest.TestCase):
             / "SKILL.md"
         )
         self.assertTrue(claude_skill.exists())
+        self.assertFalse((self.project_root / ".codex" / "portable").exists())
 
     def test_apply_claude_profile_records_conflict_for_invalid_existing_json(self):
         settings_path = self.project_root / ".claude" / "settings.json"
@@ -183,7 +185,7 @@ class TestPortableApply(unittest.TestCase):
         self.assertEqual(payload["conflicts"], 1)
         self.assertEqual(settings_path.read_text(encoding="utf-8"), "{invalid-json")
 
-        state_path = self.project_root / ".codex" / "portable" / "state.json"
+        state_path = self.project_root / ".claude" / "portable" / "state.json"
         state = json.loads(state_path.read_text(encoding="utf-8"))
         txn = state["transactions"][0]
         self.assertEqual(txn["profile"], "claude-ios")

@@ -11,7 +11,7 @@
 模板默认目录：`$HOME/.super-dev/templates/super-dev`。
 
 ## Hard Rules
-1. 回退仅根据 `.codex/portable/state.json` 与备份执行。
+1. 回退仅根据事务 `state.json` 与备份执行（支持 `.codex/portable/state.json` 与 `.claude/portable/state.json`）。
 2. 仅恢复/删除 AI 配置相关文件。
 3. 找不到可回退事务时必须报错，不允许猜测恢复。
 
@@ -56,4 +56,4 @@ python3 "$TEMPLATE_DIR/common/install/scripts/portable_rollback.py" \
 1. `status=ok`
 2. `rollback_of`
 3. `restored` / `removed`
-4. `state_file=.codex/portable/state.json`
+4. `state_file`（实际回退所用的状态文件路径）

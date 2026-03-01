@@ -37,7 +37,9 @@ Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB
 - 新版本模板缓存默认放在 `SUPER_DEV_HOME`（默认 `$HOME/.super-dev`）下。
 - 模板目录：`$HOME/.super-dev/templates/super-dev`。
 - 历史遗留目录 `.codex/portable/template/super-dev` 可手动删除，避免被误提交。
-- 项目内 `.codex/portable/state|backups|history|conflicts` 仍会保留，用于安装事务回退。
+- 项目内事务目录按 profile 保留：
+  - `codex-ios`：`.codex/portable/state|backups|history|conflicts`
+  - `claude-ios`：`.claude/portable/state|backups|history|conflicts`
 
 ## 回退
 

@@ -16,6 +16,8 @@ if SPEC is None or SPEC.loader is None:
 PORTABLE_CONFIG = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(PORTABLE_CONFIG)
 load_profile_and_manifest = PORTABLE_CONFIG.load_profile_and_manifest
+apply_profile = PORTABLE_CONFIG.apply_profile
+PortableConfigError = PORTABLE_CONFIG.PortableConfigError
 
 
 class TestPortableApply(unittest.TestCase):
@@ -95,6 +97,81 @@ class TestPortableApply(unittest.TestCase):
         self.assertEqual(merged["model"], "custom-model")
         self.assertEqual(merged["features"]["multi_agent"], False)
         self.assertIn("mcp_servers", merged)
+
+    def test_apply_failure_rolls_back_partial_changes(self):
+        original_agents = "# Existing AGENTS\n\nUser content\n"
+        agents_path = self.project_root / "AGENTS.md"
+        agents_path.write_text(original_agents, encoding="utf-8")
+
+        failing_template_root = pathlib.Path(self.tmp.name) / "failing-template"
+        profile_dir = failing_template_root / "common" / "install" / "profiles"
+        manifest_dir = failing_template_root / "common" / "install" / "manifests"
+        source_dir = failing_template_root / "ios" / "codex"
+        profile_dir.mkdir(parents=True, exist_ok=True)
+        manifest_dir.mkdir(parents=True, exist_ok=True)
+        source_dir.mkdir(parents=True, exist_ok=True)
+
+        (source_dir / "AGENTS.md").write_text("# Managed AGENTS block\n", encoding="utf-8")
+
+        (profile_dir / "failing.json").write_text(
+            json.dumps(
+                {
+                    "profile": "failing",
+                    "targets": {
+                        "agents": "AGENTS.md",
+                        "codex_config": ".codex/config.toml",
+                    },
+                    "state": {
+                        "state_file": ".codex/portable/state.json",
+                        "backup_dir": ".codex/portable/backups",
+                        "history_dir": ".codex/portable/history",
+                        "conflicts_dir": ".codex/portable/conflicts",
+                    },
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+        (manifest_dir / "failing.json").write_text(
+            json.dumps(
+                {
+                    "profile": "failing",
+                    "actions": [
+                        {
+                            "id": "agents",
+                            "src": "ios/codex/AGENTS.md",
+                            "target": "agents",
+                            "strategy": "append_block",
+                        },
+                        {
+                            "id": "broken-config",
+                            "src": "ios/codex/missing.toml",
+                            "target": "codex_config",
+                            "strategy": "merge_toml_keys",
+                        },
+                    ],
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+        with self.assertRaises(PortableConfigError):
+            apply_profile(
+                project_root=self.project_root,
+                template_root=failing_template_root,
+                profile_name="failing",
+                namespace="super-dev",
+            )
+
+        self.assertEqual(agents_path.read_text(encoding="utf-8"), original_agents)
+        state_path = self.project_root / ".codex" / "portable" / "state.json"
+        self.assertFalse(state_path.exists())
 
 
 if __name__ == "__main__":

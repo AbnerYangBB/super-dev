@@ -332,51 +332,72 @@ def apply_profile(
 
     txn_changes: list[dict[str, Any]] = []
     txn_conflicts: list[dict[str, Any]] = []
+    current_action_id = "<init>"
 
-    for action in manifest["actions"]:
-        action_id = action["id"]
-        src = template_root / action["src"]
-        target_key = action["target"]
-        strategy = action["strategy"]
+    try:
+        for action in manifest["actions"]:
+            action_id = action["id"]
+            current_action_id = action_id
+            src = template_root / action["src"]
+            target_key = action["target"]
+            strategy = action["strategy"]
 
-        if target_key not in targets:
-            raise PortableConfigError(f"Unknown target '{target_key}' in action '{action_id}'")
+            if target_key not in targets:
+                raise PortableConfigError(f"Unknown target '{target_key}' in action '{action_id}'")
 
-        dst_rel = _format_target(str(targets[target_key]), namespace)
-        dst = project_root / dst_rel
+            dst_rel = _format_target(str(targets[target_key]), namespace)
+            dst = project_root / dst_rel
 
-        if strategy == "append_block":
-            _append_block(
-                action_id=action_id,
-                src=src,
-                dst=dst,
-                namespace=namespace,
+            if strategy == "append_block":
+                _append_block(
+                    action_id=action_id,
+                    src=src,
+                    dst=dst,
+                    namespace=namespace,
+                    project_root=project_root,
+                    backup_root=backup_root,
+                    txn_changes=txn_changes,
+                )
+            elif strategy == "merge_toml_keys":
+                _merge_toml_keys(
+                    action_id=action_id,
+                    src=src,
+                    dst=dst,
+                    project_root=project_root,
+                    backup_root=backup_root,
+                    conflict_root=conflict_root,
+                    txn_changes=txn_changes,
+                    txn_conflicts=txn_conflicts,
+                )
+            elif strategy == "sync_additive_dir":
+                _sync_additive_dir(
+                    action_id=action_id,
+                    src_dir=src,
+                    dst_dir=dst,
+                    project_root=project_root,
+                    backup_root=backup_root,
+                    txn_changes=txn_changes,
+                )
+            else:
+                raise PortableConfigError(f"Unsupported strategy: {strategy}")
+    except Exception as exc:
+        try:
+            _restore_changes(
                 project_root=project_root,
-                backup_root=backup_root,
-                txn_changes=txn_changes,
+                changes=txn_changes,
             )
-        elif strategy == "merge_toml_keys":
-            _merge_toml_keys(
-                action_id=action_id,
-                src=src,
-                dst=dst,
-                project_root=project_root,
-                backup_root=backup_root,
-                conflict_root=conflict_root,
-                txn_changes=txn_changes,
-                txn_conflicts=txn_conflicts,
-            )
-        elif strategy == "sync_additive_dir":
-            _sync_additive_dir(
-                action_id=action_id,
-                src_dir=src,
-                dst_dir=dst,
-                project_root=project_root,
-                backup_root=backup_root,
-                txn_changes=txn_changes,
-            )
-        else:
-            raise PortableConfigError(f"Unsupported strategy: {strategy}")
+        except Exception as rollback_exc:
+            raise PortableConfigError(
+                f"Apply failed at action '{current_action_id}', auto-rollback failed: {rollback_exc}"
+            ) from exc
+
+        shutil.rmtree(backup_root, ignore_errors=True)
+        shutil.rmtree(conflict_root, ignore_errors=True)
+        _remove_empty_parents(backup_base, project_root)
+        _remove_empty_parents(conflicts_base, project_root)
+        _remove_empty_parents(project_root / ".codex" / "portable", project_root)
+
+        raise PortableConfigError(f"Apply failed at action '{current_action_id}': {exc}") from exc
 
     state = _load_state(state_path)
     transaction = {
@@ -422,6 +443,43 @@ def _remove_empty_parents(path: pathlib.Path, stop: pathlib.Path) -> None:
         current = current.parent
 
 
+def _restore_changes(
+    *,
+    project_root: pathlib.Path,
+    changes: list[dict[str, Any]],
+) -> tuple[int, int]:
+    restored = 0
+    removed = 0
+
+    for change in reversed(changes):
+        rel_path = change["path"]
+        file_path = project_root / rel_path
+        op = change.get("operation")
+
+        if op == "created":
+            if file_path.exists():
+                file_path.unlink()
+                removed += 1
+                _remove_empty_parents(file_path.parent, project_root)
+            continue
+
+        if op == "updated":
+            backup_rel = change.get("backup")
+            if not backup_rel:
+                raise PortableConfigError(f"Missing backup for updated file: {rel_path}")
+            backup_path = project_root / backup_rel
+            if not backup_path.exists():
+                raise PortableConfigError(f"Backup file missing: {backup_rel}")
+            _ensure_parent(file_path)
+            shutil.copy2(backup_path, file_path)
+            restored += 1
+            continue
+
+        raise PortableConfigError(f"Unsupported change operation: {op}")
+
+    return restored, removed
+
+
 def rollback_transaction(
     *,
     project_root: pathlib.Path,
@@ -449,34 +507,10 @@ def rollback_transaction(
         if target_txn is None:
             raise PortableConfigError("No rollback candidate found")
 
-    restored = 0
-    removed = 0
-
-    for change in reversed(target_txn.get("changes", [])):
-        rel_path = change["path"]
-        file_path = project_root / rel_path
-        op = change.get("operation")
-
-        if op == "created":
-            if file_path.exists():
-                file_path.unlink()
-                removed += 1
-                _remove_empty_parents(file_path.parent, project_root)
-            continue
-
-        if op == "updated":
-            backup_rel = change.get("backup")
-            if not backup_rel:
-                raise PortableConfigError(f"Missing backup for updated file: {rel_path}")
-            backup_path = project_root / backup_rel
-            if not backup_path.exists():
-                raise PortableConfigError(f"Backup file missing: {backup_rel}")
-            _ensure_parent(file_path)
-            shutil.copy2(backup_path, file_path)
-            restored += 1
-            continue
-
-        raise PortableConfigError(f"Unsupported change operation: {op}")
+    restored, removed = _restore_changes(
+        project_root=project_root,
+        changes=target_txn.get("changes", []),
+    )
 
     target_txn["rolled_back"] = True
     target_txn["rolled_back_at"] = _utc_now_iso()

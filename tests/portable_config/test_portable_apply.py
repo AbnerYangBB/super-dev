@@ -56,7 +56,7 @@ class TestPortableApply(unittest.TestCase):
         claude_profile, claude_manifest = load_profile_and_manifest(REPO_ROOT, "claude-ios")
         self.assertEqual(claude_profile["profile"], "claude-ios")
         self.assertEqual(claude_manifest["profile"], "claude-ios")
-        self.assertGreaterEqual(len(claude_manifest["actions"]), 2)
+        self.assertGreaterEqual(len(claude_manifest["actions"]), 4)
 
     def test_apply_creates_transaction_state_and_files(self):
         result = self._run_apply()

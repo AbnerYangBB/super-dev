@@ -5,7 +5,7 @@
     "claude_md": "CLAUDE.md",
     "claude_settings": ".claude/settings.json",
     "claude_mcp": ".mcp.json",
-    "claude_skills_dir": ".claude/skills/{skill_namespace}"
+    "claude_skills_dir": ".claude/skills"
   },
   "state": {
     "state_file": ".claude/portable/state.json",

@@ -20,8 +20,8 @@
 5. `CLAUDE.md` 使用受管区块追加，不整文件覆盖。
 6. `.claude/settings.json` 仅补充缺失 key，保留用户已有值。
 7. `.mcp.json` 仅补充缺失 key，保留用户已有 MCP 配置。
-8. Codex skills 仅写入 `.agents/skills/<namespace>/`，不触碰其他命名空间。
-9. Claude skills 仅写入 `.claude/skills/<namespace>/`，不触碰其他命名空间。
+8. Codex skills 仅写入 `codex/skills/`，不触碰其他目录。
+9. Claude skills 仅写入 `.claude/skills/`，不触碰其他目录。
 
 ## One-Click (AI)
 在目标项目中，让 AI 执行以下短提示词（推荐）：
@@ -95,13 +95,13 @@ python3 "$TEMPLATE_DIR/common/install/scripts/portable_apply.py" \
 ## Installed Targets (codex-ios)
 1. `ios/codex/AGENTS.md -> AGENTS.md`
 2. `ios/codex/config.toml -> .codex/config.toml`
-3. `ios/skills/** -> .agents/skills/super-dev/**`
+3. `ios/skills/** -> codex/skills/**`
 
 ## Installed Targets (claude-ios)
 1. `ios/claude/CLAUDE.md -> CLAUDE.md`
 2. `ios/claude/settings.json -> .claude/settings.json`
 3. `ios/claude/mcp.json -> .mcp.json`
-4. `ios/skills/** -> .claude/skills/super-dev/**`
+4. `ios/skills/** -> .claude/skills/**`
 
 ## Rollback Entry
 安装完成后，可执行：

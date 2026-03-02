@@ -158,8 +158,10 @@ def _append_block(
     txn_changes: list[dict[str, Any]],
 ) -> None:
     marker = namespace.upper()
-    begin = f"# BEGIN {marker} MANAGED BLOCK:{action_id}"
-    end = f"# END {marker} MANAGED BLOCK:{action_id}"
+    begin = f"<!--@sd:{namespace}:mb:{action_id}:begin-->"
+    end = f"<!--@sd:{namespace}:mb:{action_id}:end-->"
+    legacy_begin = f"# BEGIN {marker} MANAGED BLOCK:{action_id}"
+    legacy_end = f"# END {marker} MANAGED BLOCK:{action_id}"
     source_body = src.read_text(encoding="utf-8").rstrip("\n")
     managed_block = f"{begin}\n{source_body}\n{end}\n"
 
@@ -175,6 +177,16 @@ def _append_block(
             if suffix.startswith("\n"):
                 suffix = suffix[1:]
             new = prefix.rstrip("\n") + "\n\n" + managed_block + suffix
+        elif legacy_begin in old and legacy_end in old:
+            start = old.index(legacy_begin)
+            stop = old.index(legacy_end, start) + len(legacy_end)
+            prefix = old[:start]
+            suffix = old[stop:]
+            if suffix.startswith("\n"):
+                suffix = suffix[1:]
+            new = prefix.rstrip("\n") + "\n\n" + managed_block + suffix
+        elif source_body and source_body in old:
+            return
         else:
             new = old.rstrip("\n") + "\n\n" + managed_block
 

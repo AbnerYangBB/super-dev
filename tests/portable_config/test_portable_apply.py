@@ -68,7 +68,7 @@ class TestPortableApply(unittest.TestCase):
         agents_path = self.project_root / "AGENTS.md"
         self.assertTrue(agents_path.exists())
         agents_text = agents_path.read_text(encoding="utf-8")
-        self.assertIn("BEGIN SUPER-DEV MANAGED BLOCK", agents_text)
+        self.assertIn("<!--@sd:super-dev:mb:", agents_text)
 
         codex_config = self.project_root / ".codex" / "config.toml"
         self.assertTrue(codex_config.exists())
@@ -149,7 +149,7 @@ class TestPortableApply(unittest.TestCase):
         claude_md = self.project_root / "CLAUDE.md"
         self.assertTrue(claude_md.exists())
         claude_text = claude_md.read_text(encoding="utf-8")
-        self.assertIn("BEGIN SUPER-DEV MANAGED BLOCK", claude_text)
+        self.assertIn("<!--@sd:super-dev:mb:", claude_text)
 
         merged = json.loads(settings_path.read_text(encoding="utf-8"))
         self.assertEqual(merged["permissions"]["allow"], ["Bash(xcodebuild *)"])

@@ -1,0 +1,69 @@
+{
+  "platform": "claude-code",
+  "verified_at": "2026-03-02",
+  "capabilities": [
+    {
+      "id": "context_memory",
+      "support": "supported",
+      "config_path": "CLAUDE.md",
+      "fallback": "none",
+      "purpose": "沉淀项目长期指令与约束",
+      "source_url": "https://docs.anthropic.com/en/docs/claude-code/memory",
+      "notes": "支持 enterprise/user/project/local 多级记忆"
+    },
+    {
+      "id": "hooks",
+      "support": "supported",
+      "config_path": ".claude/settings.json#hooks",
+      "fallback": "none",
+      "purpose": "在关键事件执行自动校验或阻断",
+      "source_url": "https://docs.anthropic.com/en/docs/claude-code/hooks",
+      "notes": "支持 PreToolUse/PostToolUse/Notification/Stop/SubagentStop"
+    },
+    {
+      "id": "skills",
+      "support": "supported",
+      "config_path": ".claude/skills",
+      "fallback": "none",
+      "purpose": "复用结构化能力包",
+      "source_url": "https://docs.anthropic.com/en/docs/claude-code/skills",
+      "notes": "用户级路径为 ~/.claude/skills"
+    },
+    {
+      "id": "command_ext",
+      "support": "supported",
+      "config_path": ".claude/commands",
+      "fallback": "none",
+      "purpose": "快速触发预设动作模板",
+      "source_url": "https://docs.anthropic.com/en/docs/claude-code/slash-commands",
+      "notes": "支持项目级与用户级 commands"
+    },
+    {
+      "id": "subagents",
+      "support": "supported",
+      "config_path": ".claude/agents",
+      "fallback": "none",
+      "purpose": "复杂任务拆分",
+      "source_url": "https://docs.anthropic.com/en/docs/claude-code/sub-agents",
+      "notes": "用户级路径为 ~/.claude/agents"
+    },
+    {
+      "id": "mcp",
+      "support": "supported",
+      "config_path": ".mcp.json",
+      "fallback": "none",
+      "purpose": "接入外部 MCP 工具",
+      "source_url": "https://docs.anthropic.com/en/docs/claude-code/mcp",
+      "notes": "也可通过命令添加并写入配置"
+    },
+    {
+      "id": "security",
+      "support": "supported",
+      "config_path": ".claude/settings.json#permissions",
+      "fallback": "none",
+      "purpose": "控制高风险命令与文件访问",
+      "source_url": "https://docs.anthropic.com/en/docs/claude-code/settings",
+      "notes": "可结合 hooks 做前后置控制"
+    }
+  ]
+}

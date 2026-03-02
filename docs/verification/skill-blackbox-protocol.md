@@ -26,13 +26,31 @@ python3 scripts/verification/run_skill_blackbox.py \
 
 输出报告：`tests/verification/blackbox-report.json`
 
-## 子 Agent CLI 验证（会话级）
+## Agent CLI 黑盒验证（推荐）
 
-除脚本黑盒外，建议在会话中使用子 agent CLI 再跑一遍典型用例：
+除脚本黑盒外，建议执行真实 `codex` / `claude` CLI 黑盒：
 
-1. `spawn_agent` 启动执行 agent。
-2. `send_input` 投递自然语言需求。
-3. `wait` 等待完成并抓取结果。
-4. 对照文件变更与 `blackbox-report.json` 交叉验证。
+```bash
+bash scripts/verification/run_agent_cli_blackbox.sh \
+  --repo-root . \
+  --pretty
+```
 
-该步骤用于证明：不仅脚本可执行，代理协作流程也能稳定触发同一结果。
+可选参数：
+
+1. `--skip-codex`：仅验证 Claude。
+2. `--skip-claude`：仅验证 Codex。
+3. `--output <path>`：指定 JSON 报告路径。
+4. `--work-dir <dir>`：指定工作目录，不使用临时目录。
+
+输出报告默认位于临时目录，包含：
+
+1. fork 模板变更检查（能力分发是否生效）
+2. Codex/Claude 安装、更新、回退退出码
+3. 关键目标文件存在性检查
+4. 命令输出尾部，便于排障
+
+注意事项：
+
+1. Claude CLI 必须在目标项目目录执行，否则可能写错路径。
+2. 该黑盒依赖本机 `codex` / `claude` 可用且已登录。

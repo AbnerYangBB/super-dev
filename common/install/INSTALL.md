@@ -5,6 +5,7 @@
 1. 仅允许修改 AI 配置文件。
 2. 不直接替换用户已有配置。
 3. 支持后续一键回退。
+4. 同一 profile 可重复执行用于更新。
 
 ## Inputs
 1. `profile`：默认 `codex-ios`，可选 `claude-ios`。
@@ -53,6 +54,25 @@ fi
 Read and follow instructions from $HOME/.super-dev/templates/super-dev/common/install/INSTALL.md
 ```
 
+## Fork Local Template Flow (推荐给开发者)
+如果你在自己的 fork 中改了模板，推荐直接把 fork 目录作为 `template-root`：
+
+```bash
+python3 /path/to/your-fork/common/install/scripts/portable_apply.py \
+  --project-root "$(pwd)" \
+  --template-root "/path/to/your-fork" \
+  --profile codex-ios \
+  --namespace super-dev
+```
+
+```bash
+python3 /path/to/your-fork/common/install/scripts/portable_apply.py \
+  --project-root "$(pwd)" \
+  --template-root "/path/to/your-fork" \
+  --profile claude-ios \
+  --namespace super-dev
+```
+
 ## Execution Commands
 在目标项目根目录执行：
 
@@ -83,6 +103,9 @@ python3 "$TEMPLATE_DIR/common/install/scripts/portable_apply.py" \
   --profile claude-ios \
   --namespace super-dev
 ```
+
+## Update Flow
+更新流程与安装相同：对同一项目重复执行同 profile 的 `portable_apply.py` 即可。
 
 ## Expected Output
 成功时应输出 JSON，包含：

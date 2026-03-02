@@ -1,0 +1,37 @@
+name: verification
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run full verification suite
+        run: bash scripts/verification/run_all.sh
+
+      - name: Run skill blackbox
+        run: |
+          python3 scripts/verification/run_skill_blackbox.py \
+            --repo-root . \
+            --cases tests/verification/skill_blackbox_cases.json \
+            --pretty
+
+      - name: Run agent CLI blackbox smoke (script sanity)
+        run: |
+          bash scripts/verification/run_agent_cli_blackbox.sh \
+            --repo-root . \
+            --skip-codex \
+            --skip-claude \
+            --pretty

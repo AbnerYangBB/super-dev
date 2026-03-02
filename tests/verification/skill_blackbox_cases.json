@@ -45,6 +45,39 @@
     ]
   },
   {
+    "id": "add_mcp_server_custom_codex_only",
+    "prompt": "增加一个 MCP server: lint-server command: uvx args: lint-mcp --stdio 仅 codex",
+    "expected_actions": [
+      {
+        "platform": "codex-cli",
+        "operation": "merge_toml_keys",
+        "target": ".codex/config.toml"
+      }
+    ],
+    "expected_changed_files": [
+      "ios/codex/config.toml"
+    ],
+    "evidence_patterns": [
+      "lint-server",
+      "uvx"
+    ]
+  },
+  {
+    "id": "hook_custom_command_claude_only",
+    "prompt": "增加一个 hook: 提交前执行 command: npm run lint 仅 claude",
+    "expected_actions": [
+      {
+        "platform": "claude-code",
+        "operation": "merge_json_keys",
+        "target": ".claude/settings.json"
+      }
+    ],
+    "expected_changed_files": [],
+    "evidence_patterns": [
+      "npm run lint"
+    ]
+  },
+  {
     "id": "shared_instruction",
     "prompt": "增加一条通用 instruction: 所有回复必须使用中文",
     "expected_actions": [

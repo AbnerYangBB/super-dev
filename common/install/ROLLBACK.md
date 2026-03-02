@@ -51,6 +51,14 @@ python3 "$TEMPLATE_DIR/common/install/scripts/portable_rollback.py" \
   --txn-id "$TXN_ID"
 ```
 
+## Fork Local Template Flow
+如果你使用的是本地 fork 模板，也可以直接执行：
+
+```bash
+python3 /path/to/your-fork/common/install/scripts/portable_rollback.py \
+  --project-root "$(pwd)"
+```
+
 ## Expected Output
 成功时应输出 JSON，包含：
 1. `status=ok`

@@ -8,8 +8,13 @@ import hashlib
 import json
 import pathlib
 import re
+import shlex
 import sys
 from typing import Any
+
+
+class PromptParseError(RuntimeError):
+    """Raised when prompt intent cannot be safely parsed."""
 
 
 def _stable_intent_id(prefix: str, text: str) -> str:
@@ -17,9 +22,85 @@ def _stable_intent_id(prefix: str, text: str) -> str:
     return f"{prefix}_{digest}"
 
 
+def _extract_platform_targets(text: str, lowered: str) -> list[str]:
+    has_codex_only = bool(
+        re.search(
+            r"(仅|只(?:给|在)?|only)\s*(?:支持\s*)?(?:codex(?:\s*cli)?|codex-cli)",
+            text,
+            flags=re.IGNORECASE,
+        )
+    ) or "codex only" in lowered
+    has_claude_only = bool(
+        re.search(
+            r"(仅|只(?:给|在)?|only)\s*(?:支持\s*)?(?:claude(?:\s*code)?|claude-code)",
+            text,
+            flags=re.IGNORECASE,
+        )
+    ) or "claude only" in lowered
+
+    if has_codex_only and not has_claude_only:
+        return ["codex-cli"]
+    if has_claude_only and not has_codex_only:
+        return ["claude-code"]
+    return ["claude-code", "codex-cli"]
+
+
+def _strip_platform_clause(value: str) -> str:
+    value = re.split(r"\s+(?:仅|只(?:给|在)?|only)\s+(?:claude|codex).*", value, maxsplit=1, flags=re.IGNORECASE)[0]
+    return value.strip().rstrip("，,。.;；")
+
+
+def _extract_mcp_server(text: str, lowered: str) -> dict[str, Any]:
+    name_match = re.search(
+        r"(?:mcp\s*server|server)\s*[:：]\s*([a-zA-Z0-9._-]+)",
+        text,
+        flags=re.IGNORECASE,
+    ) or re.search(
+        r"(?:mcp\s*server|server)\s+([a-zA-Z0-9._-]+)",
+        text,
+        flags=re.IGNORECASE,
+    )
+    name = (name_match.group(1) if name_match else "example-server").strip()
+
+    command_match = re.search(r"command\s*[:：]\s*([^\s,，;；]+)", text, flags=re.IGNORECASE)
+    command = command_match.group(1).strip() if command_match else "npx"
+
+    args_match = re.search(r"args?\s*[:：]\s*(.+)$", text, flags=re.IGNORECASE)
+    if args_match:
+        raw_args = _strip_platform_clause(args_match.group(1))
+        args = shlex.split(raw_args)
+    else:
+        pkg = "example-mcp-server" if name == "example-server" else name
+        args = ["-y", pkg]
+
+    return {
+        "name": name,
+        "command": command,
+        "args": args,
+    }
+
+
+def _extract_hook_command(text: str, lowered: str) -> str:
+    command_match = re.search(r"command\s*[:：]\s*(.+)$", text, flags=re.IGNORECASE)
+    if command_match:
+        return _strip_platform_clause(command_match.group(1))
+
+    if "sync-add-ios-loc" in lowered:
+        return "echo run sync-add-ios-loc"
+    return "echo run custom-hook"
+
+
+def _check_unsupported_remove_semantics(text: str, lowered: str) -> None:
+    remove_keywords = ("删除", "移除", "remove", "delete")
+    if any(keyword in text or keyword in lowered for keyword in remove_keywords):
+        raise PromptParseError("当前不支持删除语义（删除/移除/remove/delete），请手工修改 intent。")
+
+
 def _build_intent_from_prompt(prompt: str) -> dict[str, Any]:
     text = prompt.strip()
     lowered = text.lower()
+    _check_unsupported_remove_semantics(text, lowered)
+    platform_targets = _extract_platform_targets(text, lowered)
 
     intent: dict[str, Any] = {
         "id": "generated_intent",
@@ -27,19 +108,21 @@ def _build_intent_from_prompt(prompt: str) -> dict[str, Any]:
         "trigger": "always",
         "tool_ref": "instruction:custom",
         "desired_behavior": text,
-        "platform_targets": ["claude-code", "codex-cli"],
+        "platform_targets": platform_targets,
         "constraints": [
             "only_touch_ai_config",
             "preserve_user_existing_config",
         ],
         "metadata": {
             "source": "platform-feature-dispatcher",
+            "original_prompt": text,
         },
     }
 
     if "hook" in lowered:
         intent["feature_type"] = "hook"
         intent["trigger"] = "pre_commit" if ("提交前" in text or "pre-commit" in lowered or "pre_commit" in lowered) else "always"
+        intent["metadata"]["hook_command"] = _extract_hook_command(text, lowered)
         if "sync-add-ios-loc" in lowered:
             intent["tool_ref"] = "skill:sync-add-ios-loc"
             intent["desired_behavior"] = "validate localization before commit"
@@ -50,8 +133,10 @@ def _build_intent_from_prompt(prompt: str) -> dict[str, Any]:
         return intent
 
     if "mcp" in lowered:
+        mcp_server = _extract_mcp_server(text, lowered)
         intent["feature_type"] = "mcp"
-        intent["tool_ref"] = "mcp:custom"
+        intent["tool_ref"] = f"mcp:{mcp_server['name']}"
+        intent["metadata"]["mcp_server"] = mcp_server
         intent["id"] = _stable_intent_id("mcp_custom", text)
         return intent
 
@@ -86,7 +171,20 @@ def main() -> int:
     from portable_dispatch import dispatch_intent, load_capability_matrix
     from portable_generate_templates import apply_actions
 
-    intent = _build_intent_from_prompt(args.prompt)
+    try:
+        intent = _build_intent_from_prompt(args.prompt)
+    except PromptParseError as exc:
+        error_payload = {
+            "status": "error",
+            "message": str(exc),
+            "prompt": args.prompt,
+        }
+        if args.pretty:
+            print(json.dumps(error_payload, ensure_ascii=False, indent=2), file=sys.stderr)
+        else:
+            print(json.dumps(error_payload, ensure_ascii=False), file=sys.stderr)
+        return 1
+
     matrix = load_capability_matrix(repo_root)
     actions = dispatch_intent(intent, matrix)
     changes = apply_actions(

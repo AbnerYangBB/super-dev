@@ -54,9 +54,46 @@ def _build_instruction_line(intent: dict[str, Any]) -> str:
     return f"[{trigger}] {tool_ref}: {behavior}".strip()
 
 
+def _resolve_hook_command(intent: dict[str, Any]) -> str:
+    metadata = intent.get("metadata", {})
+    if isinstance(metadata, dict):
+        command = metadata.get("hook_command")
+        if isinstance(command, str) and command.strip():
+            return command.strip()
+
+    tool_ref = str(intent.get("tool_ref", ""))
+    if tool_ref == "skill:sync-add-ios-loc":
+        return "echo run sync-add-ios-loc"
+    return "echo run custom-hook"
+
+
+def _resolve_mcp_server_payload(intent: dict[str, Any]) -> dict[str, Any]:
+    metadata = intent.get("metadata", {})
+    if isinstance(metadata, dict):
+        mcp_server = metadata.get("mcp_server")
+        if isinstance(mcp_server, dict):
+            name = mcp_server.get("name")
+            command = mcp_server.get("command")
+            args = mcp_server.get("args")
+            if isinstance(name, str) and name and isinstance(command, str) and command:
+                if isinstance(args, list) and all(isinstance(item, str) for item in args):
+                    return {
+                        "name": name,
+                        "command": command,
+                        "args": args,
+                    }
+
+    return {
+        "name": "example-server",
+        "command": "npx",
+        "args": ["-y", "example-mcp-server"],
+    }
+
+
 def _dispatch_hook(intent: dict[str, Any], platform: str, support: str) -> list[dict[str, Any]]:
     if support == "supported":
         if platform == "claude-code":
+            hook_command = _resolve_hook_command(intent)
             return [
                 {
                     "operation": "merge_json_keys",
@@ -70,7 +107,7 @@ def _dispatch_hook(intent: dict[str, Any], platform: str, support: str) -> list[
                                     "hooks": [
                                         {
                                             "type": "command",
-                                            "command": "echo run sync-add-ios-loc",
+                                            "command": hook_command,
                                         }
                                     ],
                                 }
@@ -123,6 +160,8 @@ def _dispatch_mcp(intent: dict[str, Any], platform: str, support: str) -> list[d
     if support != "supported":
         return _dispatch_instruction(intent, platform)
 
+    mcp_server = _resolve_mcp_server_payload(intent)
+
     if platform == "claude-code":
         return [
             {
@@ -131,9 +170,9 @@ def _dispatch_mcp(intent: dict[str, Any], platform: str, support: str) -> list[d
                 "capability": "mcp",
                 "payload": {
                     "mcpServers": {
-                        "example-server": {
-                            "command": "npx",
-                            "args": ["-y", "example-mcp-server"],
+                        mcp_server["name"]: {
+                            "command": mcp_server["command"],
+                            "args": mcp_server["args"],
                         }
                     }
                 },
@@ -148,9 +187,9 @@ def _dispatch_mcp(intent: dict[str, Any], platform: str, support: str) -> list[d
                 "capability": "mcp",
                 "payload": {
                     "mcp_servers": {
-                        "example-server": {
-                            "command": "npx",
-                            "args": ["-y", "example-mcp-server"],
+                        mcp_server["name"]: {
+                            "command": mcp_server["command"],
+                            "args": mcp_server["args"],
                         }
                     }
                 },

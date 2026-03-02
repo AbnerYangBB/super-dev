@@ -4,11 +4,17 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import pathlib
 import re
 import sys
 from typing import Any
+
+
+def _stable_intent_id(prefix: str, text: str) -> str:
+    digest = hashlib.sha1(text.encode("utf-8")).hexdigest()[:10]
+    return f"{prefix}_{digest}"
 
 
 def _build_intent_from_prompt(prompt: str) -> dict[str, Any]:
@@ -37,16 +43,16 @@ def _build_intent_from_prompt(prompt: str) -> dict[str, Any]:
         if "sync-add-ios-loc" in lowered:
             intent["tool_ref"] = "skill:sync-add-ios-loc"
             intent["desired_behavior"] = "validate localization before commit"
-            intent["id"] = "ios_loc_pre_commit_check"
+            intent["id"] = _stable_intent_id("hook_sync_add_ios_loc", text)
         else:
             intent["tool_ref"] = "hook:custom"
-            intent["id"] = "custom_hook_check"
+            intent["id"] = _stable_intent_id("hook_custom", text)
         return intent
 
     if "mcp" in lowered:
         intent["feature_type"] = "mcp"
         intent["tool_ref"] = "mcp:custom"
-        intent["id"] = "custom_mcp_integration"
+        intent["id"] = _stable_intent_id("mcp_custom", text)
         return intent
 
     if "skill" in lowered:
@@ -54,9 +60,10 @@ def _build_intent_from_prompt(prompt: str) -> dict[str, Any]:
         skill_match = re.search(r"skill[:：\s]+([a-zA-Z0-9_-]+)", lowered)
         skill_name = skill_match.group(1) if skill_match else "custom-skill"
         intent["tool_ref"] = f"skill:{skill_name}"
-        intent["id"] = f"sync_{skill_name.replace('-', '_')}"
+        intent["id"] = _stable_intent_id(f"skill_{skill_name.replace('-', '_')}", text)
         return intent
 
+    intent["id"] = _stable_intent_id("instruction_custom", text)
     return intent
 
 

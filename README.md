@@ -68,6 +68,23 @@ Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB
 Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/ROLLBACK.md and rollback latest transaction
 ```
 
+## 验证
+
+分层验证（契约 + golden + installer e2e）：
+
+```bash
+bash scripts/verification/run_all.sh
+```
+
+skill 黑盒验收：
+
+```bash
+python3 scripts/verification/run_skill_blackbox.py \
+  --repo-root . \
+  --cases tests/verification/skill_blackbox_cases.json \
+  --pretty
+```
+
 ## 仓库结构
 
 - `common/install/`: 通用安装入口、profile/manifest、安装与回退脚本。

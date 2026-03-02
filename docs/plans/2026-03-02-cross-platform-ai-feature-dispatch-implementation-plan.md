@@ -285,16 +285,16 @@ git commit -m "refactor: 对齐 installer 元数据与生成模板"
 ### Task 7: 新增 Dispatcher Skill（自然语言需求入口）
 
 **Files:**
-- Create: `ios/skills/platform-feature-dispatcher/SKILL.md`
-- Create: `ios/skills/platform-feature-dispatcher/assets/intent-template.json`
-- Create: `ios/skills/platform-feature-dispatcher/scripts/dispatch_from_prompt.py`
+- Create: `.agents/skills/platform-feature-dispatcher/SKILL.md`
+- Create: `.agents/skills/platform-feature-dispatcher/assets/intent-template.json`
+- Create: `.agents/skills/platform-feature-dispatcher/scripts/dispatch_from_prompt.py`
 - Modify: `tests/portable_config/test_docs.py`
 
 **Step 1: 先写失败测试**
 
 ```python
 def test_dispatcher_skill_doc_contains_flow(self):
-    text = (REPO_ROOT / "ios" / "skills" / "platform-feature-dispatcher" / "SKILL.md").read_text()
+    text = (REPO_ROOT / ".agents" / "skills" / "platform-feature-dispatcher" / "SKILL.md").read_text()
     self.assertIn("intent", text)
     self.assertIn("capability matrix", text)
     self.assertIn("portable_generate_templates.py", text)
@@ -324,7 +324,7 @@ Expected: PASS。
 **Step 5: 提交**
 
 ```bash
-git add ios/skills/platform-feature-dispatcher tests/portable_config/test_docs.py
+git add .agents/skills/platform-feature-dispatcher tests/portable_config/test_docs.py
 git commit -m "feat: 增加平台能力分发 skill"
 ```
 

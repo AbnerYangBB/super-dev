@@ -31,7 +31,7 @@ description: 将自然语言功能请求转换为 intent，并基于 capability 
 ## 执行命令
 
 ```bash
-python3 ios/skills/platform-feature-dispatcher/scripts/dispatch_from_prompt.py \
+python3 .agents/skills/platform-feature-dispatcher/scripts/dispatch_from_prompt.py \
   --repo-root . \
   --prompt "增加一个 Hook: 提交前使用 sync-add-ios-loc 做本地化校验" \
   --pretty
@@ -40,7 +40,7 @@ python3 ios/skills/platform-feature-dispatcher/scripts/dispatch_from_prompt.py \
 仅预览，不写文件：
 
 ```bash
-python3 ios/skills/platform-feature-dispatcher/scripts/dispatch_from_prompt.py \
+python3 .agents/skills/platform-feature-dispatcher/scripts/dispatch_from_prompt.py \
   --repo-root . \
   --prompt "增加一个 Hook: 提交前使用 sync-add-ios-loc 做本地化校验" \
   --dry-run \

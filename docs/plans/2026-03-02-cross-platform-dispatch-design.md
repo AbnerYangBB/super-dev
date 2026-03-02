@@ -66,7 +66,7 @@
 2. `common/platforms/intents/*.json`：统一意图模型。
 3. `common/install/scripts/portable_dispatch.py`：分发编译器（intent -> actions）。
 4. `common/install/scripts/portable_generate_templates.py`：模板生成器（actions -> files）。
-5. `ios/skills/platform-feature-dispatcher/`：自然语言入口 skill。
+5. `.agents/skills/platform-feature-dispatcher/`：仓库内部自然语言入口 skill（不下发给用户）。
 6. `tests/verification/*`：分层验证与子 agent 黑盒验收。
 
 ### 5.2 数据流

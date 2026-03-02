@@ -7,7 +7,7 @@
 ## 输入
 
 - 用例集：`tests/verification/skill_blackbox_cases.json`
-- 入口脚本：`ios/skills/platform-feature-dispatcher/scripts/dispatch_from_prompt.py`
+- 入口脚本：`.agents/skills/platform-feature-dispatcher/scripts/dispatch_from_prompt.py`
 
 ## 校验项
 

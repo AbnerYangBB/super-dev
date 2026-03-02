@@ -90,7 +90,14 @@ def run_blackbox_case(
 ) -> dict[str, Any]:
     case_id = case["id"]
     repo_copy = _copy_repo(repo_root, work_root, case_id)
-    skill_entry = repo_copy / "ios" / "skills" / "platform-feature-dispatcher" / "scripts" / "dispatch_from_prompt.py"
+    skill_entry = (
+        repo_copy
+        / ".agents"
+        / "skills"
+        / "platform-feature-dispatcher"
+        / "scripts"
+        / "dispatch_from_prompt.py"
+    )
     before_snapshot = _snapshot_files(repo_copy)
 
     cmd = [

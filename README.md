@@ -16,6 +16,27 @@
 - `codex-ios` 下发：`AGENTS.md`、`.codex/config.toml`、`.agents/skills/super-dev/**`。
 - `claude-ios` 下发：`CLAUDE.md`、`.claude/settings.json`、`.mcp.json`、`.claude/skills/super-dev/**`。
 
+## 能力分发生成（新增）
+
+当你希望把“一个需求”自动转换为 Claude/Codex 的差异化配置时，先准备 intent，再运行生成器：
+
+```bash
+python3 common/install/scripts/portable_generate_templates.py \
+  --repo-root . \
+  --intent-file common/platforms/intents/examples/pre-commit-sync-loc.json \
+  --pretty
+```
+
+仅查看将发生的变更（不写文件）：
+
+```bash
+python3 common/install/scripts/portable_generate_templates.py \
+  --repo-root . \
+  --intent-file common/platforms/intents/examples/pre-commit-sync-loc.json \
+  --dry-run \
+  --pretty
+```
+
 ## 快速安装（按 AI 工具）
 
 ### Codex

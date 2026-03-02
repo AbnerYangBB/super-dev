@@ -22,6 +22,9 @@ class TestRepoBasics(unittest.TestCase):
         self.assertNotIn("codex/skills", text)
         self.assertIn(".claude/skills", text)
         self.assertIn(".claude/portable/state|backups|history|conflicts", text)
+        self.assertIn("能力边界", text)
+        self.assertIn(".agents/skills/platform-feature-dispatcher", text)
+        self.assertIn("profile/manifest 不会下发到用户项目", text)
 
     def test_common_github_community_files_exist(self):
         self.assertTrue((REPO_ROOT / "CONTRIBUTING.md").exists())

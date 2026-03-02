@@ -37,6 +37,40 @@ python3 common/install/scripts/portable_generate_templates.py \
   --pretty
 ```
 
+## 指令识别范围
+
+当前 `platform-feature-dispatcher`（仓库内部 skill）是规则驱动识别，不是任意自然语言理解。入口：
+
+```bash
+python3 .agents/skills/platform-feature-dispatcher/scripts/dispatch_from_prompt.py \
+  --repo-root . \
+  --prompt "<你的需求>" \
+  --pretty
+```
+
+可稳定识别（已覆盖黑盒用例）：
+
+1. 包含 `hook`：归类为 `feature_type=hook`  
+例：`增加一个 Hook: 提交前使用 sync-add-ios-loc 做本地化校验`
+2. 包含 `mcp`：归类为 `feature_type=mcp`  
+例：`增加一个 MCP server: example-server`
+3. 包含 `skill`：归类为 `feature_type=skill`（会提取 skill 名）  
+例：`增加一个 skill: sync-add-ios-loc`
+4. 其他文本：归类为 `feature_type=instruction`
+
+当前不支持（会被当作普通 instruction 或需要手工改 intent）：
+
+1. “减少/删除/移除一个 hook” 这类删除语义（当前生成器只做增量，不做自动删除）
+2. 复杂多条件自然语言（例如同一句里混合多个平台差异策略）
+3. 超出 Claude/Codex 的第三平台分发
+
+## 能力边界
+
+1. 分发器只负责 `自然语言 -> intent -> actions -> ios 模板`，不直接改用户项目。  
+2. 用户项目修改由 installer 执行（`portable_apply.py` / `portable_rollback.py`）。  
+3. `profile/manifest 不会下发到用户项目`，它们只是模板仓库中的安装元数据。  
+4. 仓库内部开发 skill 位于 `.agents/skills/platform-feature-dispatcher`，不属于对用户下发模板。
+
 ## 快速安装（按 AI 工具）
 
 ### Codex
@@ -96,6 +130,17 @@ python3 scripts/verification/run_skill_blackbox.py \
 ## 贡献说明
 
 欢迎 issue / PR，但该仓库目前优先服务作者自用流程，外部需求不保证及时支持。详见 `CONTRIBUTING.md`。
+
+## 贡献者工作流（分发器相关）
+
+1. 先改能力矩阵或意图样例：`common/platforms/capabilities/*`、`common/platforms/intents/*`  
+2. 用内部 skill 进行 dry-run：  
+`python3 .agents/skills/platform-feature-dispatcher/scripts/dispatch_from_prompt.py --repo-root . --prompt "<需求>" --dry-run --pretty`
+3. 执行模板生成：  
+`python3 common/install/scripts/portable_generate_templates.py --repo-root . --intent-file <intent.json> --pretty`
+4. 跑验证：  
+`bash scripts/verification/run_all.sh`  
+`python3 scripts/verification/run_skill_blackbox.py --repo-root . --cases tests/verification/skill_blackbox_cases.json --pretty`
 
 ## 安全反馈
 

@@ -34,6 +34,14 @@ class TestInstallDocs(unittest.TestCase):
         self.assertIn(".claude/skills", text)
         self.assertIn(".claude/portable/state.json", text)
 
+    def test_dispatcher_skill_doc_contains_flow(self):
+        skill_path = REPO_ROOT / "ios" / "skills" / "platform-feature-dispatcher" / "SKILL.md"
+        self.assertTrue(skill_path.exists(), msg=f"Missing dispatcher skill: {skill_path}")
+        text = skill_path.read_text(encoding="utf-8")
+        self.assertIn("intent", text)
+        self.assertIn("capability matrix", text)
+        self.assertIn("portable_generate_templates.py", text)
+
     def test_rollback_doc_contains_latest_flow(self):
         text = (REPO_ROOT / "common" / "install" / "ROLLBACK.md").read_text(encoding="utf-8")
         self.assertIn("latest", text)

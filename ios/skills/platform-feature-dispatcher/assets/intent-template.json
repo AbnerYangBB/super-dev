@@ -1,0 +1,18 @@
+{
+  "id": "<intent-id>",
+  "feature_type": "<hook|skill|instruction|mcp|settings>",
+  "trigger": "<pre_commit|always|...>",
+  "tool_ref": "<skill:...|mcp:...|instruction:...>",
+  "desired_behavior": "<what_to_enforce>",
+  "platform_targets": [
+    "claude-code",
+    "codex-cli"
+  ],
+  "constraints": [
+    "only_touch_ai_config",
+    "preserve_user_existing_config"
+  ],
+  "metadata": {
+    "source": "platform-feature-dispatcher"
+  }
+}

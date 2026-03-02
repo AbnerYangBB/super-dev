@@ -7,5 +7,18 @@
       "Read(./.env.*)",
       "Read(./secrets/**)"
     ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash(git commit:*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo run sync-add-ios-loc"
+          }
+        ]
+      }
+    ]
   }
 }

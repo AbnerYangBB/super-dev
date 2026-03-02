@@ -190,6 +190,40 @@ class TestPortableApply(unittest.TestCase):
         self.assertEqual(txn["conflicts"][0]["path"], ".claude/settings.json")
         self.assertEqual(txn["conflicts"][0]["reason"], "target_json_invalid")
 
+    def test_apply_profiles_include_generated_pre_commit_localization_behavior(self):
+        codex_result = self._run_apply(profile="codex-ios")
+        self.assertEqual(codex_result.returncode, 0, msg=codex_result.stderr)
+        codex_agents = (self.project_root / "AGENTS.md").read_text(encoding="utf-8")
+        self.assertIn("sync-add-ios-loc", codex_agents)
+        self.assertIn("pre_commit", codex_agents)
+
+        claude_project = pathlib.Path(self.tmp.name) / "demo-project-claude"
+        claude_project.mkdir(parents=True, exist_ok=True)
+        script = REPO_ROOT / "common" / "install" / "scripts" / "portable_apply.py"
+        claude_result = subprocess.run(
+            [
+                "python3",
+                str(script),
+                "--project-root",
+                str(claude_project),
+                "--template-root",
+                str(REPO_ROOT),
+                "--profile",
+                "claude-ios",
+                "--namespace",
+                "super-dev",
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(claude_result.returncode, 0, msg=claude_result.stderr)
+        settings = json.loads((claude_project / ".claude" / "settings.json").read_text(encoding="utf-8"))
+        pre_tool_use = settings.get("hooks", {}).get("PreToolUse", [])
+        self.assertTrue(pre_tool_use)
+        command = pre_tool_use[0]["hooks"][0]["command"]
+        self.assertIn("sync-add-ios-loc", command)
+
     def test_apply_failure_rolls_back_partial_changes(self):
         original_agents = "# Existing AGENTS\n\nUser content\n"
         agents_path = self.project_root / "AGENTS.md"

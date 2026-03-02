@@ -75,8 +75,9 @@ class TestPortableApply(unittest.TestCase):
 
         skill_file = (
             self.project_root
-            / "codex"
+            / ".agents"
             / "skills"
+            / "super-dev"
             / "xcode-builder"
             / "SKILL.md"
         )

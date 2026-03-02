@@ -43,7 +43,7 @@ def _skill_target(platform: str) -> str:
     if platform == "claude-code":
         return ".claude/skills"
     if platform == "codex-cli":
-        return "codex/skills"
+        return ".agents/skills"
     raise DispatchError(f"Unsupported platform: {platform}")
 
 

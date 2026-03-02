@@ -23,11 +23,11 @@
     {
       "id": "skills",
       "support": "supported",
-      "config_path": "./codex/skills",
+      "config_path": "./.agents/skills",
       "fallback": "none",
       "purpose": "复用结构化能力包",
       "source_url": "https://github.com/openai/codex/blob/main/docs/agents.md",
-      "notes": "也支持 ~/.codex/skills"
+      "notes": "也支持 ~/.agents/skills"
     },
     {
       "id": "command_ext",

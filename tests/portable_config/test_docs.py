@@ -33,6 +33,8 @@ class TestInstallDocs(unittest.TestCase):
         self.assertIn(".mcp.json", text)
         self.assertIn(".claude/skills", text)
         self.assertIn(".claude/portable/state.json", text)
+        self.assertIn(".agents/skills/super-dev", text)
+        self.assertNotIn("codex/skills", text)
 
     def test_dispatcher_skill_doc_contains_flow(self):
         skill_path = REPO_ROOT / ".agents" / "skills" / "platform-feature-dispatcher" / "SKILL.md"

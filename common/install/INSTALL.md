@@ -20,7 +20,7 @@
 5. `CLAUDE.md` 使用受管区块追加，不整文件覆盖。
 6. `.claude/settings.json` 仅补充缺失 key，保留用户已有值。
 7. `.mcp.json` 仅补充缺失 key，保留用户已有 MCP 配置。
-8. Codex skills 仅写入 `codex/skills/`，不触碰其他目录。
+8. Codex skills 仅写入 `.agents/skills/<namespace>/`，不触碰其他目录。
 9. Claude skills 仅写入 `.claude/skills/`，不触碰其他目录。
 
 ## One-Click (AI)
@@ -95,7 +95,7 @@ python3 "$TEMPLATE_DIR/common/install/scripts/portable_apply.py" \
 ## Installed Targets (codex-ios)
 1. `ios/codex/AGENTS.md -> AGENTS.md`
 2. `ios/codex/config.toml -> .codex/config.toml`
-3. `ios/skills/** -> codex/skills/**`
+3. `ios/skills/** -> .agents/skills/super-dev/**`
 
 ## Installed Targets (claude-ios)
 1. `ios/claude/CLAUDE.md -> CLAUDE.md`

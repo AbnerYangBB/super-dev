@@ -84,7 +84,7 @@ def _resolve_template_path(repo_root: pathlib.Path, platform: str, target: str) 
         mapping = {
             "AGENTS.md": repo_root / "ios" / "codex" / "AGENTS.md",
             ".codex/config.toml": repo_root / "ios" / "codex" / "config.toml",
-            "codex/skills": repo_root / "ios" / "skills",
+            ".agents/skills": repo_root / "ios" / "skills",
         }
     elif platform == "claude-code":
         mapping = {

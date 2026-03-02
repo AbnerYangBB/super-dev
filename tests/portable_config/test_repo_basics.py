@@ -18,6 +18,8 @@ class TestRepoBasics(unittest.TestCase):
         self.assertIn("$HOME/.super-dev/templates/super-dev", text)
         self.assertIn("迁移说明", text)
         self.assertIn(".codex/portable/template/super-dev", text)
+        self.assertIn(".agents/skills/super-dev", text)
+        self.assertNotIn("codex/skills", text)
         self.assertIn(".claude/skills", text)
         self.assertIn(".claude/portable/state|backups|history|conflicts", text)
 

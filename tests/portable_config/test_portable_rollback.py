@@ -69,8 +69,9 @@ class TestPortableRollback(unittest.TestCase):
 
         copied_skill = (
             self.project_root
-            / "codex"
+            / ".agents"
             / "skills"
+            / "super-dev"
             / "xcode-builder"
             / "SKILL.md"
         )

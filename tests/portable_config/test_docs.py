@@ -5,6 +5,12 @@ REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 
 class TestInstallDocs(unittest.TestCase):
+    def test_research_doc_and_design_doc_exist(self):
+        matrix_doc = REPO_ROOT / "docs" / "research" / "2026-03-02-claude-codex-feature-matrix.md"
+        design_doc = REPO_ROOT / "docs" / "plans" / "2026-03-02-cross-platform-dispatch-design.md"
+        self.assertTrue(matrix_doc.exists())
+        self.assertTrue(design_doc.exists())
+
     def test_install_doc_contains_hard_rules_and_apply_command(self):
         text = (REPO_ROOT / "common" / "install" / "INSTALL.md").read_text(encoding="utf-8")
         self.assertIn("Hard Rules", text)

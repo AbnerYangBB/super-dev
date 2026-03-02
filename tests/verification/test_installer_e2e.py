@@ -11,7 +11,7 @@ class TestInstallerE2E(unittest.TestCase):
     def _run(self, *args: str, cwd: pathlib.Path | None = None) -> subprocess.CompletedProcess[str]:
         return subprocess.run(list(args), check=False, capture_output=True, text=True, cwd=cwd)
 
-    def test_apply_and_rollback_for_both_profiles(self):
+    def test_apply_and_rollback_for_all_profiles(self):
         with tempfile.TemporaryDirectory() as tmp:
             project = pathlib.Path(tmp) / "demo"
             project.mkdir(parents=True, exist_ok=True)
@@ -66,6 +66,30 @@ class TestInstallerE2E(unittest.TestCase):
                 str(project),
             )
             self.assertEqual(claude_rollback.returncode, 0, msg=claude_rollback.stderr)
+
+            trae_apply = self._run(
+                "python3",
+                str(apply_script),
+                "--project-root",
+                str(project),
+                "--template-root",
+                str(REPO_ROOT),
+                "--profile",
+                "trae-ios",
+                "--namespace",
+                "super-dev",
+            )
+            self.assertEqual(trae_apply.returncode, 0, msg=trae_apply.stderr)
+            trae_payload = json.loads(trae_apply.stdout)
+            self.assertEqual(trae_payload["status"], "ok")
+
+            trae_rollback = self._run(
+                "python3",
+                str(rollback_script),
+                "--project-root",
+                str(project),
+            )
+            self.assertEqual(trae_rollback.returncode, 0, msg=trae_rollback.stderr)
 
 
 if __name__ == "__main__":

@@ -1,14 +1,14 @@
 # Portable AI Config INSTALL
 
 ## Purpose
-将本仓库的 AI 模板（`codex-ios` / `claude-ios`）安装到当前项目，并保证：
+将本仓库的 AI 模板（`codex-ios` / `claude-ios` / `trae-ios`）安装到当前项目，并保证：
 1. 仅允许修改 AI 配置文件。
 2. 不直接替换用户已有配置。
 3. 支持后续一键回退。
 4. 同一 profile 可重复执行用于更新。
 
 ## Inputs
-1. `profile`：默认 `codex-ios`，可选 `claude-ios`。
+1. `profile`：默认 `codex-ios`，可选 `claude-ios` / `trae-ios`。
 2. `namespace`：默认 `super-dev`。
 3. `project_root`：默认当前目录。
 4. `SUPER_DEV_HOME`：可选，默认 `$HOME/.super-dev`。
@@ -23,6 +23,9 @@
 7. `.mcp.json` 仅补充缺失 key，保留用户已有 MCP 配置。
 8. Codex skills 仅写入 `.agents/skills/<namespace>/`，不触碰其他目录。
 9. Claude skills 仅写入 `.claude/skills/`，不触碰其他目录。
+10. Trae rules 仅写入 `.trae/rules/super-dev-rules.md` 的受管区块，不整文件覆盖。
+11. `mcp.json` 仅补充缺失 key，保留用户已有 MCP 配置。
+12. Trae skills 仅写入 `.trae/skills/`，不触碰其他目录。
 
 ## One-Click (AI)
 在目标项目中，让 AI 执行以下短提示词（推荐）：
@@ -33,6 +36,10 @@ Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB
 
 ```text
 Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile claude-ios in current project
+```
+
+```text
+Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile trae-ios in current project
 ```
 
 ## Private Repo Fallback
@@ -73,6 +80,14 @@ python3 /path/to/your-fork/common/install/scripts/portable_apply.py \
   --namespace super-dev
 ```
 
+```bash
+python3 /path/to/your-fork/common/install/scripts/portable_apply.py \
+  --project-root "$(pwd)" \
+  --template-root "/path/to/your-fork" \
+  --profile trae-ios \
+  --namespace super-dev
+```
+
 ## Execution Commands
 在目标项目根目录执行：
 
@@ -102,6 +117,13 @@ python3 "$TEMPLATE_DIR/common/install/scripts/portable_apply.py" \
   --template-root "$TEMPLATE_DIR" \
   --profile claude-ios \
   --namespace super-dev
+
+# Trae iOS
+python3 "$TEMPLATE_DIR/common/install/scripts/portable_apply.py" \
+  --project-root "$PROJECT_ROOT" \
+  --template-root "$TEMPLATE_DIR" \
+  --profile trae-ios \
+  --namespace super-dev
 ```
 
 ## Update Flow
@@ -114,6 +136,7 @@ python3 "$TEMPLATE_DIR/common/install/scripts/portable_apply.py" \
 3. `state_file`（按 profile）：
    - `codex-ios`: `.codex/portable/state.json`
    - `claude-ios`: `.claude/portable/state.json`
+   - `trae-ios`: `.trae/portable/state.json`
 
 ## Installed Targets (codex-ios)
 1. `ios/codex/AGENTS.md -> AGENTS.md`
@@ -125,6 +148,11 @@ python3 "$TEMPLATE_DIR/common/install/scripts/portable_apply.py" \
 2. `ios/claude/settings.json -> .claude/settings.json`
 3. `ios/claude/mcp.json -> .mcp.json`
 4. `ios/skills/** -> .claude/skills/**`
+
+## Installed Targets (trae-ios)
+1. `ios/trae/RULES.md -> .trae/rules/super-dev-rules.md`
+2. `ios/trae/mcp.json -> mcp.json`
+3. `ios/skills/** -> .trae/skills/**`
 
 ## Rollback Entry
 安装完成后，可执行：

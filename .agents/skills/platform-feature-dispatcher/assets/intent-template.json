@@ -6,7 +6,8 @@
   "desired_behavior": "<what_to_enforce>",
   "platform_targets": [
     "claude-code",
-    "codex-cli"
+    "codex-cli",
+    "trae-ide"
   ],
   "constraints": [
     "only_touch_ai_config",

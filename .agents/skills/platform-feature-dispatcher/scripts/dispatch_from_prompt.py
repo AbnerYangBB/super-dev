@@ -37,16 +37,30 @@ def _extract_platform_targets(text: str, lowered: str) -> list[str]:
             flags=re.IGNORECASE,
         )
     ) or "claude only" in lowered
+    has_trae_only = bool(
+        re.search(
+            r"(仅|只(?:给|在)?|only)\s*(?:支持\s*)?(?:trae(?:\s*ide)?|trae-ide)",
+            text,
+            flags=re.IGNORECASE,
+        )
+    ) or "trae only" in lowered
 
-    if has_codex_only and not has_claude_only:
+    if has_codex_only and not has_claude_only and not has_trae_only:
         return ["codex-cli"]
-    if has_claude_only and not has_codex_only:
+    if has_claude_only and not has_codex_only and not has_trae_only:
         return ["claude-code"]
-    return ["claude-code", "codex-cli"]
+    if has_trae_only and not has_codex_only and not has_claude_only:
+        return ["trae-ide"]
+    return ["claude-code", "codex-cli", "trae-ide"]
 
 
 def _strip_platform_clause(value: str) -> str:
-    value = re.split(r"\s+(?:仅|只(?:给|在)?|only)\s+(?:claude|codex).*", value, maxsplit=1, flags=re.IGNORECASE)[0]
+    value = re.split(
+        r"\s+(?:仅|只(?:给|在)?|only)\s+(?:claude|codex|trae).*",
+        value,
+        maxsplit=1,
+        flags=re.IGNORECASE,
+    )[0]
     return value.strip().rstrip("，,。.;；")
 
 

@@ -1,6 +1,6 @@
 ---
 name: platform-feature-dispatcher
-description: 将自然语言功能请求转换为 intent，并基于 capability matrix 生成 Claude/Codex 配置模板变更。
+description: 将自然语言功能请求转换为 intent，并基于 capability matrix 生成 Claude/Codex/Trae 配置模板变更。
 ---
 
 # Platform Feature Dispatcher
@@ -25,7 +25,7 @@ description: 将自然语言功能请求转换为 intent，并基于 capability 
 2. 按 `assets/intent-template.json` 生成 intent。
 3. 读取 capability matrix（`common/platforms/capabilities/*.json`）。
 4. 运行分发编译：`portable_dispatch.py`（intent -> platform actions）。
-5. 运行模板生成：`portable_generate_templates.py`（actions -> `ios/codex/*` 和 `ios/claude/*`）。
+5. 运行模板生成：`portable_generate_templates.py`（actions -> `ios/codex/*`、`ios/claude/*`、`ios/trae/*`）。
 6. 输出变更摘要与验证命令。
 
 ## 执行命令

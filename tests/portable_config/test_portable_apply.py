@@ -58,6 +58,11 @@ class TestPortableApply(unittest.TestCase):
         self.assertEqual(claude_manifest["profile"], "claude-ios")
         self.assertGreaterEqual(len(claude_manifest["actions"]), 4)
 
+        trae_profile, trae_manifest = load_profile_and_manifest(REPO_ROOT, "trae-ios")
+        self.assertEqual(trae_profile["profile"], "trae-ios")
+        self.assertEqual(trae_manifest["profile"], "trae-ios")
+        self.assertGreaterEqual(len(trae_manifest["actions"]), 3)
+
     def test_apply_creates_transaction_state_and_files(self):
         result = self._run_apply()
         self.assertEqual(result.returncode, 0, msg=result.stderr)
@@ -191,6 +196,56 @@ class TestPortableApply(unittest.TestCase):
         self.assertEqual(txn["conflicts"][0]["path"], ".claude/settings.json")
         self.assertEqual(txn["conflicts"][0]["reason"], "target_json_invalid")
 
+    def test_apply_trae_profile_creates_rules_and_skills(self):
+        rules_path = self.project_root / ".trae" / "rules" / "super-dev-rules.md"
+        mcp_path = self.project_root / "mcp.json"
+        rules_path.parent.mkdir(parents=True, exist_ok=True)
+        rules_path.write_text("# User Rules\n", encoding="utf-8")
+        mcp_path.write_text(
+            json.dumps(
+                {
+                    "mcpServers": {
+                        "custom-server": {
+                            "command": "custom-mcp",
+                            "args": [],
+                        }
+                    }
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+        result = self._run_apply(profile="trae-ios")
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "ok")
+        self.assertEqual(payload["conflicts"], 0)
+        self.assertEqual(payload["state_file"], ".trae/portable/state.json")
+
+        rules_text = rules_path.read_text(encoding="utf-8")
+        self.assertIn("# User Rules", rules_text)
+        self.assertIn("<!--@sd:super-dev:mb:", rules_text)
+
+        mcp_merged = json.loads(mcp_path.read_text(encoding="utf-8"))
+        self.assertIn("custom-server", mcp_merged["mcpServers"])
+        self.assertIn("sequential-thinking", mcp_merged["mcpServers"])
+        self.assertIn("context7", mcp_merged["mcpServers"])
+        self.assertIn("serena", mcp_merged["mcpServers"])
+
+        trae_skill = self.project_root / ".trae" / "skills" / "xcode-builder" / "SKILL.md"
+        self.assertTrue(trae_skill.exists())
+        self.assertFalse((self.project_root / ".codex" / "portable").exists())
+        self.assertFalse((self.project_root / ".claude" / "portable").exists())
+
+        state_path = self.project_root / ".trae" / "portable" / "state.json"
+        state = json.loads(state_path.read_text(encoding="utf-8"))
+        txn = state["transactions"][0]
+        self.assertEqual(txn["profile"], "trae-ios")
+
     def test_apply_profiles_include_generated_pre_commit_localization_behavior(self):
         codex_result = self._run_apply(profile="codex-ios")
         self.assertEqual(codex_result.returncode, 0, msg=codex_result.stderr)
@@ -224,6 +279,30 @@ class TestPortableApply(unittest.TestCase):
         self.assertTrue(pre_tool_use)
         command = pre_tool_use[0]["hooks"][0]["command"]
         self.assertIn("sync-add-ios-loc", command)
+
+        trae_project = pathlib.Path(self.tmp.name) / "demo-project-trae"
+        trae_project.mkdir(parents=True, exist_ok=True)
+        trae_result = subprocess.run(
+            [
+                "python3",
+                str(script),
+                "--project-root",
+                str(trae_project),
+                "--template-root",
+                str(REPO_ROOT),
+                "--profile",
+                "trae-ios",
+                "--namespace",
+                "super-dev",
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(trae_result.returncode, 0, msg=trae_result.stderr)
+        trae_rules = (trae_project / ".trae" / "rules" / "super-dev-rules.md").read_text(encoding="utf-8")
+        self.assertIn("sync-add-ios-loc", trae_rules)
+        self.assertIn("pre_commit", trae_rules)
 
     def test_apply_failure_rolls_back_partial_changes(self):
         original_agents = "# Existing AGENTS\n\nUser content\n"

@@ -30,9 +30,14 @@ class TestInstallDocs(unittest.TestCase):
         self.assertIn("Private Repo Fallback", text)
         self.assertIn("git@github.com:AbnerYangBB/super-dev.git", text)
         self.assertIn("claude-ios", text)
+        self.assertIn("trae-ios", text)
         self.assertIn(".mcp.json", text)
         self.assertIn(".claude/skills", text)
         self.assertIn(".claude/portable/state.json", text)
+        self.assertIn(".trae/rules/super-dev-rules.md", text)
+        self.assertIn("mcp.json", text)
+        self.assertIn(".trae/skills", text)
+        self.assertIn(".trae/portable/state.json", text)
         self.assertIn(".agents/skills/super-dev", text)
         self.assertNotIn("codex/skills", text)
 
@@ -53,6 +58,7 @@ class TestInstallDocs(unittest.TestCase):
         self.assertIn("$HOME/.super-dev", text)
         self.assertIn(".super-dev/templates/super-dev", text)
         self.assertIn(".claude/portable/state.json", text)
+        self.assertIn(".trae/portable/state.json", text)
         self.assertNotIn(".codex/portable/template/super-dev", text)
         self.assertNotIn("<RAW_BASE_URL>", text)
         self.assertIn(

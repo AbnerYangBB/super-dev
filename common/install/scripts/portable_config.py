@@ -19,6 +19,7 @@ class PortableConfigError(RuntimeError):
 STATE_FILE_CANDIDATES = (
     ".codex/portable/state.json",
     ".claude/portable/state.json",
+    ".trae/portable/state.json",
 )
 
 

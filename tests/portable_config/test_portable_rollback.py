@@ -106,6 +106,32 @@ class TestPortableRollback(unittest.TestCase):
         )
         self.assertFalse(claude_skill.exists())
 
+    def test_rollback_trae_apply_uses_trae_state(self):
+        apply_result = self._run_apply(profile="trae-ios")
+        self.assertEqual(apply_result.returncode, 0, msg=apply_result.stderr)
+
+        trae_state_path = self.project_root / ".trae" / "portable" / "state.json"
+        self.assertTrue(trae_state_path.exists())
+        self.assertFalse((self.project_root / ".codex" / "portable").exists())
+        self.assertFalse((self.project_root / ".claude" / "portable").exists())
+
+        rollback_result = self._run_rollback()
+        self.assertEqual(rollback_result.returncode, 0, msg=rollback_result.stderr)
+        payload = json.loads(rollback_result.stdout)
+        self.assertEqual(payload["state_file"], ".trae/portable/state.json")
+
+        state = json.loads(trae_state_path.read_text(encoding="utf-8"))
+        self.assertTrue(state["transactions"][0]["rolled_back"])
+
+        trae_skill = (
+            self.project_root
+            / ".trae"
+            / "skills"
+            / "xcode-builder"
+            / "SKILL.md"
+        )
+        self.assertFalse(trae_skill.exists())
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -6,7 +6,8 @@
   "desired_behavior": "validate localization before commit",
   "platform_targets": [
     "claude-code",
-    "codex-cli"
+    "codex-cli",
+    "trae-ide"
   ],
   "constraints": [
     "only_touch_ai_config",

@@ -28,6 +28,7 @@ class TestSkillBlackbox(unittest.TestCase):
 
         self.assertEqual(report["status"], "passed")
         self.assertIn("ios/codex/AGENTS.md", report["changed_files"])
+        self.assertIn("ios/trae/RULES.md", report["changed_files"])
         self.assertTrue(any("sync-add-ios-loc" in line for line in report["evidence"]))
 
 

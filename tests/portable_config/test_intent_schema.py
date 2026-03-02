@@ -21,6 +21,7 @@ class TestIntentSchema(unittest.TestCase):
         self.assertIn("sync-add-ios-loc", intent["tool_ref"])
         self.assertIn("claude-code", intent["platform_targets"])
         self.assertIn("codex-cli", intent["platform_targets"])
+        self.assertIn("trae-ide", intent["platform_targets"])
 
 
 if __name__ == "__main__":

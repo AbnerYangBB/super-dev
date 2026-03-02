@@ -40,7 +40,8 @@
         "type": "string",
         "enum": [
           "claude-code",
-          "codex-cli"
+          "codex-cli",
+          "trae-ide"
         ]
       }
     },

@@ -22,6 +22,9 @@ class TestDispatchContract(unittest.TestCase):
 
         self.assertEqual(result["codex-cli"][0]["operation"], "append_block")
         self.assertIn(result["claude-code"][0]["operation"], {"merge_json_keys", "append_block"})
+        if "trae-ide" in intent.get("platform_targets", []):
+            self.assertEqual(result["trae-ide"][0]["operation"], "append_block")
+            self.assertEqual(result["trae-ide"][0]["target"], ".trae/rules/super-dev-rules.md")
 
 
 if __name__ == "__main__":

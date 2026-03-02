@@ -93,6 +93,12 @@ def _resolve_template_path(repo_root: pathlib.Path, platform: str, target: str) 
             ".mcp.json": repo_root / "ios" / "claude" / "mcp.json",
             ".claude/skills": repo_root / "ios" / "skills",
         }
+    elif platform == "trae-ide":
+        mapping = {
+            ".trae/rules/super-dev-rules.md": repo_root / "ios" / "trae" / "RULES.md",
+            ".trae/skills": repo_root / "ios" / "skills",
+            "mcp.json": repo_root / "ios" / "trae" / "mcp.json",
+        }
     else:
         raise TemplateGenerationError(f"Unsupported platform: {platform}")
 

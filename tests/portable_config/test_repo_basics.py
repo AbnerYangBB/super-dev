@@ -12,7 +12,7 @@ class TestRepoBasics(unittest.TestCase):
         self.assertIn("super-dev", text)
         self.assertIn("目前仅用于自用", text)
         self.assertIn("可能存在风险", text)
-        self.assertIn("仅支持 iOS 工程的 Codex / Claude 配置", text)
+        self.assertIn("仅支持 iOS 工程的 Codex / Claude / Trae 配置", text)
 
         section_scope = text.index("## 当前支持范围")
         section_quickstart = text.index("## 开箱即用")
@@ -27,6 +27,7 @@ class TestRepoBasics(unittest.TestCase):
         self.assertIn("Fetch and follow instructions", text)
         self.assertIn("install profile codex-ios", text)
         self.assertIn("install profile claude-ios", text)
+        self.assertIn("install profile trae-ios", text)
         self.assertIn("rollback latest transaction", text)
         self.assertIn("fork", text.lower())
         self.assertIn("platform-feature-dispatcher", text)

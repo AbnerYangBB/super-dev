@@ -1,0 +1,15 @@
+{
+  "profile": "trae-ios",
+  "description": "Trae IDE iOS template target mapping",
+  "targets": {
+    "trae_rules": ".trae/rules/super-dev-rules.md",
+    "trae_mcp": "mcp.json",
+    "trae_skills_dir": ".trae/skills"
+  },
+  "state": {
+    "state_file": ".trae/portable/state.json",
+    "backup_dir": ".trae/portable/backups",
+    "history_dir": ".trae/portable/history",
+    "conflicts_dir": ".trae/portable/conflicts"
+  }
+}

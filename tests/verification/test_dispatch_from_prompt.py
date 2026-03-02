@@ -14,6 +14,13 @@ SPEC.loader.exec_module(DISPATCH_FROM_PROMPT)
 
 
 class TestDispatchFromPrompt(unittest.TestCase):
+    def test_build_intent_defaults_to_all_supported_platforms(self):
+        intent = DISPATCH_FROM_PROMPT._build_intent_from_prompt(
+            "增加一个 Hook: 提交前使用 sync-add-ios-loc 做本地化校验"
+        )
+        self.assertEqual(intent["feature_type"], "hook")
+        self.assertEqual(intent["platform_targets"], ["claude-code", "codex-cli", "trae-ide"])
+
     def test_build_intent_with_custom_mcp_command_and_platform(self):
         intent = DISPATCH_FROM_PROMPT._build_intent_from_prompt(
             "增加一个 MCP server: lint-server command: uvx args: lint-mcp --stdio 仅 codex"
@@ -33,6 +40,13 @@ class TestDispatchFromPrompt(unittest.TestCase):
         self.assertEqual(intent["platform_targets"], ["claude-code"])
         self.assertEqual(intent["metadata"]["hook_command"], "npm run lint")
         self.assertEqual(intent["trigger"], "pre_commit")
+
+    def test_build_intent_with_trae_only_target(self):
+        intent = DISPATCH_FROM_PROMPT._build_intent_from_prompt(
+            "增加一个 instruction: 使用团队规则 仅 trae"
+        )
+        self.assertEqual(intent["feature_type"], "instruction")
+        self.assertEqual(intent["platform_targets"], ["trae-ide"])
 
     def test_prompt_remove_semantics_returns_error(self):
         cmd = [

@@ -11,7 +11,7 @@
 模板默认目录：`$HOME/.super-dev/templates/super-dev`。
 
 ## Hard Rules
-1. 回退仅根据事务 `state.json` 与备份执行（支持 `.codex/portable/state.json` 与 `.claude/portable/state.json`）。
+1. 回退仅根据事务 `state.json` 与备份执行（支持 `.codex/portable/state.json`、`.claude/portable/state.json`、`.trae/portable/state.json`）。
 2. 仅恢复/删除 AI 配置相关文件。
 3. 找不到可回退事务时必须报错，不允许猜测恢复。
 

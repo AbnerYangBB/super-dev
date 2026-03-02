@@ -8,7 +8,7 @@ CAP_DIR = REPO_ROOT / "common" / "platforms" / "capabilities"
 
 class TestCapabilityMatrix(unittest.TestCase):
     def test_capability_matrix_has_required_fields(self):
-        for filename in ("claude-code.json", "codex-cli.json"):
+        for filename in ("claude-code.json", "codex-cli.json", "trae-ide.json"):
             path = CAP_DIR / filename
             self.assertTrue(path.exists(), msg=f"Missing matrix file: {path}")
             payload = json.loads(path.read_text(encoding="utf-8"))

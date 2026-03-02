@@ -11,9 +11,10 @@
 
 ## 当前支持范围
 
-- 仅支持 iOS 工程的 Codex / Claude 配置。
+- 仅支持 iOS 工程的 Codex / Claude / Trae 配置。
 - `codex-ios` 下发：`AGENTS.md`、`.codex/config.toml`、`.agents/skills/super-dev/**`。
 - `claude-ios` 下发：`CLAUDE.md`、`.claude/settings.json`、`.mcp.json`、`.claude/skills/**`。
+- `trae-ios` 下发：`.trae/rules/super-dev-rules.md`、`mcp.json`、`.trae/skills/**`。
 - 支持安装、更新、回滚。
 
 ## 开箱即用
@@ -32,6 +33,12 @@ Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB
 Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile claude-ios in current project
 ```
 
+### 安装 Trae
+
+```text
+Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile trae-ios in current project
+```
+
 ### 更新（重复安装即可）
 
 ```text
@@ -40,6 +47,10 @@ Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB
 
 ```text
 Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile claude-ios in current project as update
+```
+
+```text
+Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile trae-ios in current project as update
 ```
 
 ## 卸载
@@ -59,7 +70,7 @@ Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB
 ### 2) 在 fork 里让 AI 定制能力
 
 ```text
-In this fork repository, use .agents/skills/platform-feature-dispatcher to customize feature request: "<你的需求>" for codex and claude. Run dry-run first, then apply template changes, and summarize changed files.
+In this fork repository, use .agents/skills/platform-feature-dispatcher to customize feature request: "<你的需求>" for codex, claude and trae. Run dry-run first, then apply template changes, and summarize changed files.
 ```
 
 示例需求：
@@ -80,6 +91,10 @@ Read and follow instructions from /path/to/your-fork/common/install/INSTALL.md a
 
 ```text
 Read and follow instructions from /path/to/your-fork/common/install/INSTALL.md and install profile claude-ios in current project using template root /path/to/your-fork. Do not clone remote repository.
+```
+
+```text
+Read and follow instructions from /path/to/your-fork/common/install/INSTALL.md and install profile trae-ios in current project using template root /path/to/your-fork. Do not clone remote repository.
 ```
 
 ## 常见问题

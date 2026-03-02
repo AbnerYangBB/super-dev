@@ -93,5 +93,8 @@ Read and follow instructions from /path/to/your-fork/common/install/INSTALL.md a
 3. Claude 执行后文件写错目录怎么办？
 - 让 AI 在“目标项目目录”执行，不要在模板仓库目录执行。
 
-4. 提示词执行失败怎么办？
+4. Codex 提示 “Not inside a trusted directory” 怎么办？
+- 在 Codex 命令里增加 `--skip-git-repo-check`，或先在受信任仓库目录执行。
+
+5. 提示词执行失败怎么办？
 - 先让 AI 输出错误日志，再把日志贴回 issue 或本地排查。

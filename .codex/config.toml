@@ -1,0 +1,12 @@
+model = "gpt-5.3-codex"
+
+[features]
+multi_agent = true
+
+[agents]
+max_threads = 6
+max_depth = 2
+
+[mcp_servers.sequential-thinking]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-sequential-thinking"]

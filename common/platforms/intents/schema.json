@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Cross Platform Feature Intent",
+  "type": "object",
+  "required": [
+    "id",
+    "feature_type",
+    "trigger",
+    "tool_ref",
+    "desired_behavior",
+    "platform_targets"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "feature_type": {
+      "type": "string",
+      "enum": [
+        "hook",
+        "skill",
+        "instruction",
+        "mcp",
+        "settings"
+      ]
+    },
+    "trigger": {
+      "type": "string"
+    },
+    "tool_ref": {
+      "type": "string"
+    },
+    "desired_behavior": {
+      "type": "string"
+    },
+    "platform_targets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "claude-code",
+          "codex-cli"
+        ]
+      }
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

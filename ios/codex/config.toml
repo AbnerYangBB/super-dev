@@ -7,9 +7,9 @@ multi_agent = true
 max_threads = 6
 max_depth = 2
 
-[mcp_servers.sequential-thinking]
-command = "npx"
-args = ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+[mcp_servers.xcode]
+command = "xcrun"
+args = ["mcpbridge"]
 
 [mcp_servers.context7]
 command = "npx"
@@ -18,11 +18,6 @@ args = ["-y", "@upstash/context7-mcp"]
 [mcp_servers.serena]
 command = "uvx"
 args = ["--from", "git+https://github.com/oraios/serena", "serena", "start-mcp-server", "--context", "codex"]
-
-[mcp_servers.XcodeBuildMCP]
-command = "npx"
-enabled = false
-args = ["-y", "xcodebuildmcp@latest", "mcp"]
 
 [mcp_servers.firebase]
 command = "npx"

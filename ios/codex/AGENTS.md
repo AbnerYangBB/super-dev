@@ -23,3 +23,7 @@
 1. 明确说明：改了什么、为什么改、影响哪些文件。
 2. 明确说明：执行了哪些验证（编译/运行/测试）以及结果。
 3. 明确说明：未执行项及原因（工具缺失、设备不可用、权限限制等）。
+
+# BEGIN SUPER-DEV DISPATCH:ios_loc_pre_commit_check:codex-cli:0
+[pre_commit] skill:sync-add-ios-loc: validate localization before commit
+# END SUPER-DEV DISPATCH:ios_loc_pre_commit_check:codex-cli:0

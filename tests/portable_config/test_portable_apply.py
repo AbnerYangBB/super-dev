@@ -162,7 +162,7 @@ class TestPortableApply(unittest.TestCase):
 
         mcp_merged = json.loads(mcp_path.read_text(encoding="utf-8"))
         self.assertIn("custom-server", mcp_merged["mcpServers"])
-        self.assertIn("sequential-thinking", mcp_merged["mcpServers"])
+        self.assertNotIn("sequential-thinking", mcp_merged["mcpServers"])
         self.assertIn("context7", mcp_merged["mcpServers"])
         self.assertIn("serena", mcp_merged["mcpServers"])
 
@@ -232,7 +232,7 @@ class TestPortableApply(unittest.TestCase):
 
         mcp_merged = json.loads(mcp_path.read_text(encoding="utf-8"))
         self.assertIn("custom-server", mcp_merged["mcpServers"])
-        self.assertIn("sequential-thinking", mcp_merged["mcpServers"])
+        self.assertNotIn("sequential-thinking", mcp_merged["mcpServers"])
         self.assertIn("context7", mcp_merged["mcpServers"])
         self.assertIn("serena", mcp_merged["mcpServers"])
 

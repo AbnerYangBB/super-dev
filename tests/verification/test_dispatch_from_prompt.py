@@ -48,6 +48,14 @@ class TestDispatchFromPrompt(unittest.TestCase):
         self.assertEqual(intent["feature_type"], "instruction")
         self.assertEqual(intent["platform_targets"], ["trae-ide"])
 
+    def test_build_intent_detects_web_domain(self):
+        intent = DISPATCH_FROM_PROMPT._build_intent_from_prompt(
+            "增加一个 web skill: frontend-design"
+        )
+        self.assertEqual(intent["feature_type"], "skill")
+        self.assertEqual(intent["tool_ref"], "skill:frontend-design")
+        self.assertEqual(intent["metadata"]["domain"], "web")
+
     def test_prompt_remove_semantics_returns_error(self):
         cmd = [
             "python3",

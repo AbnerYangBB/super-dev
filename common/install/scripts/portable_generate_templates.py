@@ -79,25 +79,26 @@ def _toml_dump(data: dict[str, Any]) -> str:
     return "\n".join(lines).strip() + "\n"
 
 
-def _resolve_template_path(repo_root: pathlib.Path, platform: str, target: str) -> pathlib.Path:
+def _resolve_template_path(repo_root: pathlib.Path, platform: str, target: str, domain: str) -> pathlib.Path:
+    domain_root = "web" if domain == "web" else "ios"
     if platform == "codex-cli":
         mapping = {
-            "AGENTS.md": repo_root / "ios" / "codex" / "AGENTS.md",
-            ".codex/config.toml": repo_root / "ios" / "codex" / "config.toml",
-            ".agents/skills": repo_root / "ios" / "skills",
+            "AGENTS.md": repo_root / domain_root / "codex" / "AGENTS.md",
+            ".codex/config.toml": repo_root / domain_root / "codex" / "config.toml",
+            ".agents/skills": repo_root / domain_root / "skills",
         }
     elif platform == "claude-code":
         mapping = {
-            "CLAUDE.md": repo_root / "ios" / "claude" / "CLAUDE.md",
-            ".claude/settings.json": repo_root / "ios" / "claude" / "settings.json",
-            ".mcp.json": repo_root / "ios" / "claude" / "mcp.json",
-            ".claude/skills": repo_root / "ios" / "skills",
+            "CLAUDE.md": repo_root / domain_root / "claude" / "CLAUDE.md",
+            ".claude/settings.json": repo_root / domain_root / "claude" / "settings.json",
+            ".mcp.json": repo_root / domain_root / "claude" / "mcp.json",
+            ".claude/skills": repo_root / domain_root / "skills",
         }
     elif platform == "trae-ide":
         mapping = {
-            ".trae/rules/super-dev-rules.md": repo_root / "ios" / "trae" / "RULES.md",
-            ".trae/skills": repo_root / "ios" / "skills",
-            "mcp.json": repo_root / "ios" / "trae" / "mcp.json",
+            ".trae/rules/super-dev-rules.md": repo_root / domain_root / "trae" / "RULES.md",
+            ".trae/skills": repo_root / domain_root / "skills",
+            "mcp.json": repo_root / domain_root / "trae" / "mcp.json",
         }
     else:
         raise TemplateGenerationError(f"Unsupported platform: {platform}")
@@ -183,17 +184,18 @@ def apply_actions(
             op = action["operation"]
             target = action["target"]
             payload = action.get("payload", {})
+            domain = str(action.get("domain", intent_id.split("_", 1)[0] if "_" in intent_id else "ios"))
 
             if op == "sync_additive_dir":
                 # 该操作属于模板外部下发动作，生成阶段无需改动 ios/skills 原始目录。
                 continue
 
-            template_path = _resolve_template_path(repo_root, platform, target)
+            template_path = _resolve_template_path(repo_root, platform, target, domain)
             changed = False
 
             if op == "append_block":
                 instruction = payload.get("instruction", "")
-                block_id = f"{intent_id}:{platform}:{idx}"
+                block_id = f"{intent_id}:{platform}:{idx}" if domain == "ios" else f"{domain}:{intent_id}:{platform}:{idx}"
                 changed = _append_managed_block(template_path, block_id, instruction, dry_run)
             elif op == "merge_json_keys":
                 changed = _merge_json_file(template_path, payload, dry_run)

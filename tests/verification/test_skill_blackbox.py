@@ -31,6 +31,22 @@ class TestSkillBlackbox(unittest.TestCase):
         self.assertIn("ios/trae/RULES.md", report["changed_files"])
         self.assertTrue(any("sync-add-ios-loc" in line for line in report["evidence"]))
 
+    def test_skill_blackbox_case_web_frontend_skill(self):
+        cases_path = REPO_ROOT / "tests" / "verification" / "skill_blackbox_cases.json"
+        cases = BLACKBOX.load_cases(cases_path)
+
+        case = next(item for item in cases if item["id"] == "web_frontend_skill")
+        with tempfile.TemporaryDirectory() as tmp:
+            report = BLACKBOX.run_blackbox_case(
+                repo_root=REPO_ROOT,
+                case=case,
+                work_root=pathlib.Path(tmp),
+            )
+
+        self.assertEqual(report["status"], "passed")
+        self.assertIn("common/platforms/intents/generated", "\n".join(report["changed_files"]))
+        self.assertTrue(any("frontend-design" in line for line in report["evidence"]))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -134,5 +134,34 @@
     "evidence_patterns": [
       "团队定义规则"
     ]
+  },
+  {
+    "id": "web_frontend_skill",
+    "prompt": "增加一条 web instruction: 使用 frontend-design 处理页面设计",
+    "expected_actions": [
+      {
+        "platform": "claude-code",
+        "operation": "append_block",
+        "target": "CLAUDE.md"
+      },
+      {
+        "platform": "codex-cli",
+        "operation": "append_block",
+        "target": "AGENTS.md"
+      },
+      {
+        "platform": "trae-ide",
+        "operation": "append_block",
+        "target": ".trae/rules/super-dev-rules.md"
+      }
+    ],
+    "expected_changed_files": [
+      "web/codex/AGENTS.md",
+      "web/claude/CLAUDE.md",
+      "web/trae/RULES.md"
+    ],
+    "evidence_patterns": [
+      "frontend-design"
+    ]
   }
 ]

@@ -1,0 +1,29 @@
+{
+  "profile": "claude-web",
+  "actions": [
+    {
+      "id": "web-claude-memory",
+      "src": "web/claude/CLAUDE.md",
+      "target": "claude_md",
+      "strategy": "append_block"
+    },
+    {
+      "id": "web-claude-settings",
+      "src": "web/claude/settings.json",
+      "target": "claude_settings",
+      "strategy": "merge_json_keys"
+    },
+    {
+      "id": "web-claude-mcp",
+      "src": "web/claude/mcp.json",
+      "target": "claude_mcp",
+      "strategy": "merge_json_keys"
+    },
+    {
+      "id": "web-claude-skills",
+      "src": "web/skills",
+      "target": "claude_skills_dir",
+      "strategy": "sync_additive_dir"
+    }
+  ]
+}

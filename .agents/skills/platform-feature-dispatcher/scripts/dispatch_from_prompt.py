@@ -54,6 +54,13 @@ def _extract_platform_targets(text: str, lowered: str) -> list[str]:
     return ["claude-code", "codex-cli", "trae-ide"]
 
 
+def _extract_domain(text: str, lowered: str) -> str:
+    web_keywords = ("web", "frontend", "front-end", "网页", "前端")
+    if any(keyword in lowered or keyword in text for keyword in web_keywords):
+        return "web"
+    return "ios"
+
+
 def _strip_platform_clause(value: str) -> str:
     value = re.split(
         r"\s+(?:仅|只(?:给|在)?|only)\s+(?:claude|codex|trae).*",
@@ -115,6 +122,7 @@ def _build_intent_from_prompt(prompt: str) -> dict[str, Any]:
     lowered = text.lower()
     _check_unsupported_remove_semantics(text, lowered)
     platform_targets = _extract_platform_targets(text, lowered)
+    domain = _extract_domain(text, lowered)
 
     intent: dict[str, Any] = {
         "id": "generated_intent",
@@ -130,6 +138,7 @@ def _build_intent_from_prompt(prompt: str) -> dict[str, Any]:
         "metadata": {
             "source": "platform-feature-dispatcher",
             "original_prompt": text,
+            "domain": domain,
         },
     }
 

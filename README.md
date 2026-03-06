@@ -1,6 +1,6 @@
 # super-dev
 
-可移植的 AI 工程配置仓库，当前聚焦 iOS 开发场景。
+可移植的 AI 工程配置仓库，当前支持 iOS 与 web 开发场景。
 项目本身由 AI 自动生成，使用 https://github.com/obra/superpowers skills 框架（建议安装）。
 
 ## 状态声明
@@ -11,32 +11,54 @@
 
 ## 当前支持范围
 
-- 仅支持 iOS 工程的 Codex / Claude / Trae 配置。
-- `codex-ios` 下发：`AGENTS.md`、`.codex/config.toml`、`.agents/skills/super-dev/**`。
-- `claude-ios` 下发：`CLAUDE.md`、`.claude/settings.json`、`.mcp.json`、`.claude/skills/**`。
-- `trae-ios` 下发：`.trae/rules/super-dev-rules.md`、`mcp.json`、`.trae/skills/**`。
-- 支持安装、更新、回滚。
+- 历史基线：仅支持 iOS 工程的 Codex / Claude / Trae 配置。
+- 支持 Codex / Claude / Trae 的 iOS 与 web 配置。
+- iOS profiles：`codex-ios`、`claude-ios`、`trae-ios`。
+- web profiles：`codex-web`、`claude-web`、`trae-web`。
+- 支持安装、更新、回滚，以及通过分发器把自然语言请求写入 `ios/...` 或 `web/...` 模板。
+- 共装策略：
+  - iOS 与 web 可安装到同一目标项目。
+  - 共享文件继续采用受管区块追加与缺失 key 合并，不覆盖用户已有配置。
+  - 回退默认回退“最近一次事务”，例如最后装的是 `codex-web`，则只回退 web 这一笔。
 
 ## 开箱即用
 
 把下面提示词直接贴给 AI（在你的目标项目目录执行）。
 
-### 安装 Codex
+### 安装 Codex iOS
 
 ```text
 Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile codex-ios in current project
 ```
 
-### 安装 Claude
+### 安装 Claude iOS
 
 ```text
 Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile claude-ios in current project
 ```
 
-### 安装 Trae
+### 安装 Trae iOS
 
 ```text
 Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile trae-ios in current project
+```
+
+### 安装 Codex web
+
+```text
+Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile codex-web in current project
+```
+
+### 安装 Claude web
+
+```text
+Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile claude-web in current project
+```
+
+### 安装 Trae web
+
+```text
+Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile trae-web in current project
 ```
 
 ### 更新（重复安装即可）
@@ -51,6 +73,18 @@ Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB
 
 ```text
 Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile trae-ios in current project as update
+```
+
+```text
+Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile codex-web in current project as update
+```
+
+```text
+Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile claude-web in current project as update
+```
+
+```text
+Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile trae-web in current project as update
 ```
 
 ## 卸载
@@ -83,6 +117,10 @@ In this fork repository, use .agents/skills/platform-feature-dispatcher to custo
 增加一个 MCP server: lint-server command: uvx args: lint-mcp --stdio 仅 codex
 ```
 
+```text
+增加一条 web instruction: 使用 frontend-design 处理页面设计
+```
+
 ### 3) 在目标项目重新更新
 
 ```text
@@ -95,6 +133,18 @@ Read and follow instructions from /path/to/your-fork/common/install/INSTALL.md a
 
 ```text
 Read and follow instructions from /path/to/your-fork/common/install/INSTALL.md and install profile trae-ios in current project using template root /path/to/your-fork. Do not clone remote repository.
+```
+
+```text
+Read and follow instructions from /path/to/your-fork/common/install/INSTALL.md and install profile codex-web in current project using template root /path/to/your-fork. Do not clone remote repository.
+```
+
+```text
+Read and follow instructions from /path/to/your-fork/common/install/INSTALL.md and install profile claude-web in current project using template root /path/to/your-fork. Do not clone remote repository.
+```
+
+```text
+Read and follow instructions from /path/to/your-fork/common/install/INSTALL.md and install profile trae-web in current project using template root /path/to/your-fork. Do not clone remote repository.
 ```
 
 ## 常见问题
@@ -113,3 +163,6 @@ Read and follow instructions from /path/to/your-fork/common/install/INSTALL.md a
 
 5. 提示词执行失败怎么办？
 - 先让 AI 输出错误日志，再把日志贴回 issue 或本地排查。
+
+6. iOS 和 web 可以一起装吗？
+- 可以。建议按需要分别执行 `*-ios` 和 `*-web` profile；若要回退其中一个，注意回退默认只撤销最近一次安装事务。

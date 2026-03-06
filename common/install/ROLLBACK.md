@@ -14,6 +14,7 @@
 1. 回退仅根据事务 `state.json` 与备份执行（支持 `.codex/portable/state.json`、`.claude/portable/state.json`、`.trae/portable/state.json`）。
 2. 仅恢复/删除 AI 配置相关文件。
 3. 找不到可回退事务时必须报错，不允许猜测恢复。
+4. 若同一项目同时安装了 iOS 与 web，默认只回退最近一次安装事务，不会连带回退更早的平台事务。
 
 ## One-Click (AI)
 在目标项目中，让 AI 执行：

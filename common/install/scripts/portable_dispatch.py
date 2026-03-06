@@ -95,6 +95,7 @@ def _resolve_mcp_server_payload(intent: dict[str, Any]) -> dict[str, Any]:
 
 
 def _dispatch_hook(intent: dict[str, Any], platform: str, support: str) -> list[dict[str, Any]]:
+    domain = str(intent.get("metadata", {}).get("domain", "ios"))
     if support == "supported":
         if platform == "claude-code":
             hook_command = _resolve_hook_command(intent)
@@ -103,6 +104,7 @@ def _dispatch_hook(intent: dict[str, Any], platform: str, support: str) -> list[
                     "operation": "merge_json_keys",
                     "target": ".claude/settings.json",
                     "capability": "hooks",
+                    "domain": domain,
                     "payload": {
                         "hooks": {
                             "PreToolUse": [
@@ -126,6 +128,7 @@ def _dispatch_hook(intent: dict[str, Any], platform: str, support: str) -> list[
             "operation": "append_block",
             "target": _memory_target(platform),
             "capability": "hooks",
+            "domain": domain,
             "payload": {
                 "instruction": _build_instruction_line(intent),
                 "fallback_reason": "hooks_not_supported_or_not_documented",
@@ -135,11 +138,13 @@ def _dispatch_hook(intent: dict[str, Any], platform: str, support: str) -> list[
 
 
 def _dispatch_instruction(intent: dict[str, Any], platform: str) -> list[dict[str, Any]]:
+    domain = str(intent.get("metadata", {}).get("domain", "ios"))
     return [
         {
             "operation": "append_block",
             "target": _memory_target(platform),
             "capability": "instruction",
+            "domain": domain,
             "payload": {
                 "instruction": _build_instruction_line(intent),
             },
@@ -148,11 +153,13 @@ def _dispatch_instruction(intent: dict[str, Any], platform: str) -> list[dict[st
 
 
 def _dispatch_skill(intent: dict[str, Any], platform: str) -> list[dict[str, Any]]:
+    domain = str(intent.get("metadata", {}).get("domain", "ios"))
     return [
         {
             "operation": "sync_additive_dir",
             "target": _skill_target(platform),
             "capability": "skills",
+            "domain": domain,
             "payload": {
                 "tool_ref": intent.get("tool_ref"),
             },
@@ -161,6 +168,7 @@ def _dispatch_skill(intent: dict[str, Any], platform: str) -> list[dict[str, Any
 
 
 def _dispatch_mcp(intent: dict[str, Any], platform: str, support: str) -> list[dict[str, Any]]:
+    domain = str(intent.get("metadata", {}).get("domain", "ios"))
     if support != "supported":
         return _dispatch_instruction(intent, platform)
 
@@ -172,6 +180,7 @@ def _dispatch_mcp(intent: dict[str, Any], platform: str, support: str) -> list[d
                 "operation": "merge_json_keys",
                 "target": ".mcp.json",
                 "capability": "mcp",
+                "domain": domain,
                 "payload": {
                     "mcpServers": {
                         mcp_server["name"]: {
@@ -189,6 +198,7 @@ def _dispatch_mcp(intent: dict[str, Any], platform: str, support: str) -> list[d
                 "operation": "merge_toml_keys",
                 "target": ".codex/config.toml",
                 "capability": "mcp",
+                "domain": domain,
                 "payload": {
                     "mcp_servers": {
                         mcp_server["name"]: {
@@ -206,6 +216,7 @@ def _dispatch_mcp(intent: dict[str, Any], platform: str, support: str) -> list[d
                 "operation": "merge_json_keys",
                 "target": "mcp.json",
                 "capability": "mcp",
+                "domain": domain,
                 "payload": {
                     "mcpServers": {
                         mcp_server["name"]: {

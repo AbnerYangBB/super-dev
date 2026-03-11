@@ -7,7 +7,10 @@ import argparse
 import copy
 import json
 import pathlib
-import tomllib
+try:
+    import tomllib
+except ImportError:
+    import toml as tomllib
 from typing import Any
 
 from portable_dispatch import dispatch_intent, load_capability_matrix, load_json
@@ -99,6 +102,12 @@ def _resolve_template_path(repo_root: pathlib.Path, platform: str, target: str, 
             ".trae/rules/super-dev-rules.md": repo_root / domain_root / "trae" / "RULES.md",
             ".trae/skills": repo_root / domain_root / "skills",
             "mcp.json": repo_root / domain_root / "trae" / "mcp.json",
+        }
+    elif platform == "cursor-ide":
+        mapping = {
+            ".cursor/rules/super-dev.mdc": repo_root / domain_root / "cursor" / "rules" / "super-dev.mdc",
+            ".cursor/mcp.json": repo_root / domain_root / "cursor" / "mcp.json",
+            ".agents/skills": repo_root / domain_root / "skills",
         }
     else:
         raise TemplateGenerationError(f"Unsupported platform: {platform}")

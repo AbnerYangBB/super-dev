@@ -1,0 +1,23 @@
+{
+  "profile": "cursor-web",
+  "actions": [
+    {
+      "id": "cursor-rules",
+      "src": "web/cursor/rules/super-dev.mdc",
+      "target": "cursor_rules_dir",
+      "strategy": "append_block"
+    },
+    {
+      "id": "cursor-mcp",
+      "src": "web/cursor/mcp.json",
+      "target": "cursor_mcp",
+      "strategy": "merge_json_keys"
+    },
+    {
+      "id": "cursor-skills",
+      "src": "web/skills",
+      "target": "cursor_skills_dir",
+      "strategy": "sync_additive_dir"
+    }
+  ]
+}

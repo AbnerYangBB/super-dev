@@ -1,0 +1,69 @@
+{
+  "platform": "cursor-ide",
+  "verified_at": "2026-03-02",
+  "capabilities": [
+    {
+      "id": "context_memory",
+      "support": "supported",
+      "config_path": ".cursor/rules",
+      "fallback": "none",
+      "purpose": "沉淀项目长期指令与约束 (MDC 规范)",
+      "source_url": "https://docs.cursor.com/context/rules",
+      "notes": "支持项目级 .cursor/rules/*.mdc 文件，带 Frontmatter 与智能触发"
+    },
+    {
+      "id": "hooks",
+      "support": "fallback_required",
+      "config_path": null,
+      "fallback": "append_instruction_block",
+      "purpose": "在关键时机触发校验或策略",
+      "source_url": "https://docs.cursor.com/context/rules",
+      "notes": "官方未提供等价 Hooks 机制，回退到 MDC 规则指令"
+    },
+    {
+      "id": "skills",
+      "support": "supported",
+      "config_path": ".agents/skills",
+      "fallback": "none",
+      "purpose": "复用结构化能力包",
+      "source_url": "https://docs.cursor.com/context/rules",
+      "notes": "使用 .agents/skills 目录管理技能包，与 Codex 保持一致"
+    },
+    {
+      "id": "command_ext",
+      "support": "fallback_required",
+      "config_path": null,
+      "fallback": "append_instruction_block",
+      "purpose": "快速触发预设动作模板",
+      "source_url": "https://docs.cursor.com/context/rules",
+      "notes": "回退到 MDC 规则指令"
+    },
+    {
+      "id": "subagents",
+      "support": "fallback_required",
+      "config_path": null,
+      "fallback": "append_process_instruction",
+      "purpose": "复杂任务拆分",
+      "source_url": "https://docs.cursor.com/context/rules",
+      "notes": "回退到 MDC 流程指令"
+    },
+    {
+      "id": "mcp",
+      "support": "supported",
+      "config_path": ".cursor/mcp.json",
+      "fallback": "none",
+      "purpose": "接入外部 MCP 工具",
+      "source_url": "https://docs.cursor.com/context/mcp",
+      "notes": "2026 年支持项目级 .cursor/mcp.json 配置"
+    },
+    {
+      "id": "security",
+      "support": "fallback_required",
+      "config_path": null,
+      "fallback": "append_process_instruction",
+      "purpose": "控制高风险命令与文件访问",
+      "source_url": "https://docs.cursor.com/context/rules",
+      "notes": "回退到 MDC 规则约束"
+    }
+  ]
+}

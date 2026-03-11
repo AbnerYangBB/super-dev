@@ -19,7 +19,7 @@ def load_json(path: pathlib.Path) -> dict[str, Any]:
 
 def load_capability_matrix(repo_root: pathlib.Path) -> dict[str, dict[str, dict[str, Any]]]:
     cap_dir = repo_root / "common" / "platforms" / "capabilities"
-    files = ("claude-code.json", "codex-cli.json", "trae-ide.json")
+    files = ("claude-code.json", "codex-cli.json", "trae-ide.json", "cursor-ide.json")
 
     matrix: dict[str, dict[str, dict[str, Any]]] = {}
     for filename in files:
@@ -38,6 +38,8 @@ def _memory_target(platform: str) -> str:
         return "AGENTS.md"
     if platform == "trae-ide":
         return ".trae/rules/super-dev-rules.md"
+    if platform == "cursor-ide":
+        return ".cursor/rules/super-dev.mdc"
     raise DispatchError(f"Unsupported platform: {platform}")
 
 
@@ -48,6 +50,8 @@ def _skill_target(platform: str) -> str:
         return ".agents/skills"
     if platform == "trae-ide":
         return ".trae/skills"
+    if platform == "cursor-ide":
+        return ".agents/skills"
     raise DispatchError(f"Unsupported platform: {platform}")
 
 
@@ -215,6 +219,24 @@ def _dispatch_mcp(intent: dict[str, Any], platform: str, support: str) -> list[d
             {
                 "operation": "merge_json_keys",
                 "target": "mcp.json",
+                "capability": "mcp",
+                "domain": domain,
+                "payload": {
+                    "mcpServers": {
+                        mcp_server["name"]: {
+                            "command": mcp_server["command"],
+                            "args": mcp_server["args"],
+                        }
+                    }
+                },
+            }
+        ]
+
+    if platform == "cursor-ide":
+        return [
+            {
+                "operation": "merge_json_keys",
+                "target": ".cursor/mcp.json",
                 "capability": "mcp",
                 "domain": domain,
                 "payload": {

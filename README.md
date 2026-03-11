@@ -12,9 +12,9 @@
 ## 当前支持范围
 
 - 历史基线：仅支持 iOS 工程的 Codex / Claude / Trae 配置。
-- 支持 Codex / Claude / Trae 的 iOS 与 web 配置。
-- iOS profiles：`codex-ios`、`claude-ios`、`trae-ios`。
-- web profiles：`codex-web`、`claude-web`、`trae-web`。
+- 支持 Codex / Claude / Trae / Cursor 的 iOS 与 web 配置。
+- iOS profiles：`codex-ios`、`claude-ios`、`trae-ios`、`cursor-ios`。
+- web profiles：`codex-web`、`claude-web`、`trae-web`、`cursor-web`。
 - 支持安装、更新、回滚，以及通过分发器把自然语言请求写入 `ios/...` 或 `web/...` 模板。
 - 共装策略：
   - iOS 与 web 可安装到同一目标项目。
@@ -61,6 +61,18 @@ Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB
 Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile trae-web in current project
 ```
 
+### 安装 Cursor iOS
+
+```text
+Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile cursor-ios in current project
+```
+
+### 安装 Cursor web
+
+```text
+Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile cursor-web in current project
+```
+
 ### 更新（重复安装即可）
 
 ```text
@@ -87,6 +99,14 @@ Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB
 Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile trae-web in current project as update
 ```
 
+```text
+Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile cursor-ios in current project as update
+```
+
+```text
+Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile cursor-web in current project as update
+```
+
 ## 卸载
 
 ```text
@@ -104,7 +124,7 @@ Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB
 ### 2) 在 fork 里让 AI 定制能力
 
 ```text
-In this fork repository, use .agents/skills/platform-feature-dispatcher to customize feature request: "<你的需求>" for codex, claude and trae. Run dry-run first, then apply template changes, and summarize changed files.
+In this fork repository, use .agents/skills/platform-feature-dispatcher to customize feature request: "<你的需求>" for codex, claude, trae and cursor. Run dry-run first, then apply template changes, and summarize changed files.
 ```
 
 示例需求：
@@ -145,6 +165,14 @@ Read and follow instructions from /path/to/your-fork/common/install/INSTALL.md a
 
 ```text
 Read and follow instructions from /path/to/your-fork/common/install/INSTALL.md and install profile trae-web in current project using template root /path/to/your-fork. Do not clone remote repository.
+```
+
+```text
+Read and follow instructions from /path/to/your-fork/common/install/INSTALL.md and install profile cursor-ios in current project using template root /path/to/your-fork. Do not clone remote repository.
+```
+
+```text
+Read and follow instructions from /path/to/your-fork/common/install/INSTALL.md and install profile cursor-web in current project using template root /path/to/your-fork. Do not clone remote repository.
 ```
 
 ## 常见问题

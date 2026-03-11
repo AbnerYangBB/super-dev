@@ -1,0 +1,23 @@
+{
+  "profile": "cursor-ios",
+  "actions": [
+    {
+      "id": "cursor-rules",
+      "src": "ios/cursor/rules/super-dev.mdc",
+      "target": "cursor_rules_dir",
+      "strategy": "append_block"
+    },
+    {
+      "id": "cursor-mcp",
+      "src": "ios/cursor/mcp.json",
+      "target": "cursor_mcp",
+      "strategy": "merge_json_keys"
+    },
+    {
+      "id": "cursor-skills",
+      "src": "ios/skills",
+      "target": "cursor_skills_dir",
+      "strategy": "sync_additive_dir"
+    }
+  ]
+}

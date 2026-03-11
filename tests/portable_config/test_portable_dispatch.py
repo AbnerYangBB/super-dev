@@ -26,10 +26,13 @@ class TestPortableDispatch(unittest.TestCase):
         self.assertIn("claude-code", result)
         self.assertIn("codex-cli", result)
         self.assertIn("trae-ide", result)
+        self.assertIn("cursor-ide", result)
         self.assertEqual(result["claude-code"][0]["operation"], "merge_json_keys")
         self.assertEqual(result["codex-cli"][0]["operation"], "append_block")
         self.assertEqual(result["trae-ide"][0]["operation"], "append_block")
+        self.assertEqual(result["cursor-ide"][0]["operation"], "append_block")
         self.assertEqual(result["trae-ide"][0]["target"], ".trae/rules/super-dev-rules.md")
+        self.assertEqual(result["cursor-ide"][0]["target"], ".cursor/rules/super-dev.mdc")
 
     def test_dispatch_instruction_intent_generates_memory_actions(self):
         matrix = DISPATCHER.load_capability_matrix(REPO_ROOT)
@@ -39,13 +42,14 @@ class TestPortableDispatch(unittest.TestCase):
             "trigger": "always",
             "tool_ref": "instruction:keep-chinese",
             "desired_behavior": "all output in chinese",
-            "platform_targets": ["claude-code", "codex-cli", "trae-ide"],
+            "platform_targets": ["claude-code", "codex-cli", "trae-ide", "cursor-ide"],
         }
 
         result = DISPATCHER.dispatch_intent(intent, matrix)
         self.assertEqual(result["claude-code"][0]["target"], "CLAUDE.md")
         self.assertEqual(result["codex-cli"][0]["target"], "AGENTS.md")
         self.assertEqual(result["trae-ide"][0]["target"], ".trae/rules/super-dev-rules.md")
+        self.assertEqual(result["cursor-ide"][0]["target"], ".cursor/rules/super-dev.mdc")
 
     def test_dispatch_mcp_uses_intent_metadata_payload(self):
         matrix = DISPATCHER.load_capability_matrix(REPO_ROOT)
@@ -55,7 +59,7 @@ class TestPortableDispatch(unittest.TestCase):
             "trigger": "always",
             "tool_ref": "mcp:lint-server",
             "desired_behavior": "add lint mcp server",
-            "platform_targets": ["claude-code", "codex-cli", "trae-ide"],
+            "platform_targets": ["claude-code", "codex-cli", "trae-ide", "cursor-ide"],
             "metadata": {
                 "mcp_server": {
                     "name": "lint-server",
@@ -78,6 +82,12 @@ class TestPortableDispatch(unittest.TestCase):
         trae_server = result["trae-ide"][0]["payload"]["mcpServers"]["lint-server"]
         self.assertEqual(trae_server["command"], "uvx")
         self.assertEqual(trae_server["args"], ["lint-mcp", "--stdio"])
+
+        self.assertEqual(result["cursor-ide"][0]["operation"], "merge_json_keys")
+        self.assertEqual(result["cursor-ide"][0]["target"], ".cursor/mcp.json")
+        cursor_server = result["cursor-ide"][0]["payload"]["mcpServers"]["lint-server"]
+        self.assertEqual(cursor_server["command"], "uvx")
+        self.assertEqual(cursor_server["args"], ["lint-mcp", "--stdio"])
 
     def test_dispatch_hook_uses_metadata_command_for_claude(self):
         matrix = DISPATCHER.load_capability_matrix(REPO_ROOT)

@@ -1,14 +1,14 @@
 # Portable AI Config INSTALL
 
 ## Purpose
-将本仓库的 AI 模板（`codex-ios` / `claude-ios` / `trae-ios` / `codex-web` / `claude-web` / `trae-web`）安装到当前项目，并保证：
+将本仓库的 AI 模板（`codex-ios` / `claude-ios` / `trae-ios` / `cursor-ios` / `codex-web` / `claude-web` / `trae-web` / `cursor-web`）安装到当前项目，并保证：
 1. 仅允许修改 AI 配置文件。
 2. 不直接替换用户已有配置。
 3. 支持后续一键回退。
 4. 同一 profile 可重复执行用于更新。
 
 ## Inputs
-1. `profile`：默认 `codex-ios`，可选 `claude-ios` / `trae-ios` / `codex-web` / `claude-web` / `trae-web`。
+1. `profile`：默认 `codex-ios`，可选 `claude-ios` / `trae-ios` / `cursor-ios` / `codex-web` / `claude-web` / `trae-web` / `cursor-web`。
 2. `namespace`：默认 `super-dev`。
 3. `project_root`：默认当前目录。
 4. `SUPER_DEV_HOME`：可选，默认 `$HOME/.super-dev`。
@@ -26,6 +26,9 @@
 10. Trae rules 仅写入 `.trae/rules/super-dev-rules.md` 的受管区块，不整文件覆盖。
 11. `mcp.json` 仅补充缺失 key，保留用户已有 MCP 配置。
 12. Trae skills 仅写入 `.trae/skills/`，不触碰其他目录。
+13. Cursor rules 仅写入 `.cursor/rules/super-dev.mdc` 的受管区块，不整文件覆盖。
+14. `.cursor/mcp.json` 仅补充缺失 key，保留用户已有 MCP 配置。
+15. Cursor skills 仅写入 `.agents/skills/<namespace>/`，不触碰其他目录。
 
 ## One-Click (AI)
 在目标项目中，让 AI 执行以下短提示词（推荐）：
@@ -52,6 +55,14 @@ Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB
 
 ```text
 Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile trae-web in current project
+```
+
+```text
+Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile cursor-ios in current project
+```
+
+```text
+Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile cursor-web in current project
 ```
 
 ## Private Repo Fallback
@@ -203,6 +214,8 @@ python3 "$TEMPLATE_DIR/common/install/scripts/portable_apply.py" \
    - `codex-web`: `.codex/portable/state.json`
    - `claude-web`: `.claude/portable/state.json`
    - `trae-web`: `.trae/portable/state.json`
+   - `cursor-ios`: `.cursor/portable/state.json`
+   - `cursor-web`: `.cursor/portable/state.json`
 
 ## Installed Targets (codex-ios)
 1. `ios/codex/AGENTS.md -> AGENTS.md`
@@ -235,6 +248,16 @@ python3 "$TEMPLATE_DIR/common/install/scripts/portable_apply.py" \
 1. `web/trae/RULES.md -> .trae/rules/super-dev-rules.md`
 2. `web/trae/mcp.json -> mcp.json`
 3. `web/skills/** -> .trae/skills/**`
+
+## Installed Targets (cursor-ios)
+1. `ios/cursor/rules/super-dev.mdc -> .cursor/rules/super-dev.mdc`
+2. `ios/cursor/mcp.json -> .cursor/mcp.json`
+3. `ios/skills/** -> .agents/skills/<namespace>/**`
+
+## Installed Targets (cursor-web)
+1. `web/cursor/rules/super-dev.mdc -> .cursor/rules/super-dev.mdc`
+2. `web/cursor/mcp.json -> .cursor/mcp.json`
+3. `web/skills/** -> .agents/skills/<namespace>/**`
 
 ## Rollback Entry
 安装完成后，可执行：

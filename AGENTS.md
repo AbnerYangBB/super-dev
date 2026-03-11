@@ -1,7 +1,7 @@
 # super-dev AGENTS Playbook
 
 ## 1. 项目北极星（不可偏离）
-1. 这是一个可移植 AI 工程配置仓库，当前聚焦 iOS + `codex-cli` + `claude-code`。
+1. 这是一个可移植 AI 工程配置仓库，当前聚焦 iOS + `codex-cli` + `claude-code` + `cursor-ide`。
 2. 小白用户应能完成完整闭环：
    `fork` 仓库 -> 用内置 `platform-feature-dispatcher` 添加能力 -> 安装/更新到目标项目 -> 可回退。
 3. 分发器职责是：`自然语言 -> intent -> actions -> 模板变更`，不直接改用户业务代码。
@@ -12,8 +12,8 @@
    `README.md` 必须让小白理解 4 件事：项目做什么、如何安装、如何自定义能力、如何贡献。
 2. 能力链路可用性：
    fork 后可用 `.agents/skills/platform-feature-dispatcher` 生成模板变更，并可通过安装命令落地到目标项目。
-3. 双平台可用性：
-   `codex-cli` 与 `claude-code` 都能执行安装/更新，并产出预期文件与状态记录。
+3. 多平台可用性：
+   `codex-cli`、`claude-code`、`trae-ide` 与 `cursor-ide` 都能执行安装/更新，并产出预期文件与状态记录。
 4. 回退可用性：
    `portable_rollback.py` 能回退最近事务，输出 `status=ok`。
 5. 验证可复现：
@@ -104,8 +104,8 @@ codex exec -C "$TARGET_PROJECT" -s workspace-write --add-dir "$TEMPLATE_ROOT" --
 ```
 4. 验收时至少检查：
    - `status=ok`
-   - 目标文件存在（`AGENTS.md` / `CLAUDE.md` / `.codex/config.toml` / `.claude/settings.json` / `.mcp.json` / skills 目录）
-   - state 文件存在（`.codex/portable/state.json` 或 `.claude/portable/state.json`）
+   - 目标文件存在（`AGENTS.md` / `CLAUDE.md` / `.codex/config.toml` / `.claude/settings.json` / `.mcp.json` / `.trae/rules` / `.cursor/rules` / skills 目录）
+   - state 文件存在（`.codex/portable/state.json` / `.claude/portable/state.json` / `.trae/portable/state.json` / `.cursor/portable/state.json`）
 
 ## 6. 已验证经验与坑位
 1. `claude -p` 会以当前工作目录为项目根；若不 `cd` 到目标项目，可能把文件写到错误目录。

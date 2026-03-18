@@ -20,6 +20,7 @@ STATE_FILE_CANDIDATES = (
     ".codex/portable/state.json",
     ".claude/portable/state.json",
     ".trae/portable/state.json",
+    ".cursor/portable/state.json",
 )
 
 
@@ -398,6 +399,32 @@ def _sync_additive_dir(
         )
 
 
+def _prepare_directory_target(
+    *,
+    action_id: str,
+    dst_dir: pathlib.Path,
+    project_root: pathlib.Path,
+    backup_root: pathlib.Path,
+    txn_changes: list[dict[str, Any]],
+) -> None:
+    if dst_dir.exists() and not dst_dir.is_dir():
+        rel_path = str(dst_dir.relative_to(project_root))
+        backup_rel = _backup_file(project_root=project_root, file_path=dst_dir, backup_root=backup_root)
+        dst_dir.unlink()
+        dst_dir.mkdir(parents=True, exist_ok=True)
+        txn_changes.append(
+            {
+                "path": rel_path,
+                "operation": "replaced_with_dir",
+                "backup": backup_rel,
+                "action_id": action_id,
+            }
+        )
+        return
+
+    dst_dir.mkdir(parents=True, exist_ok=True)
+
+
 def apply_profile(
     *,
     project_root: pathlib.Path,
@@ -461,6 +488,13 @@ def apply_profile(
                     txn_conflicts=txn_conflicts,
                 )
             elif strategy == "sync_additive_dir":
+                _prepare_directory_target(
+                    action_id=action_id,
+                    dst_dir=dst,
+                    project_root=project_root,
+                    backup_root=backup_root,
+                    txn_changes=txn_changes,
+                )
                 _sync_additive_dir(
                     action_id=action_id,
                     src_dir=src,
@@ -590,7 +624,10 @@ def _restore_changes(
 
         if op == "created":
             if file_path.exists():
-                file_path.unlink()
+                if file_path.is_dir():
+                    shutil.rmtree(file_path)
+                else:
+                    file_path.unlink()
                 removed += 1
                 _remove_empty_parents(file_path.parent, project_root)
             continue
@@ -602,6 +639,23 @@ def _restore_changes(
             backup_path = project_root / backup_rel
             if not backup_path.exists():
                 raise PortableConfigError(f"Backup file missing: {backup_rel}")
+            _ensure_parent(file_path)
+            shutil.copy2(backup_path, file_path)
+            restored += 1
+            continue
+
+        if op == "replaced_with_dir":
+            backup_rel = change.get("backup")
+            if not backup_rel:
+                raise PortableConfigError(f"Missing backup for replaced_with_dir: {rel_path}")
+            backup_path = project_root / backup_rel
+            if not backup_path.exists():
+                raise PortableConfigError(f"Backup file missing: {backup_rel}")
+            if file_path.exists():
+                if file_path.is_dir():
+                    shutil.rmtree(file_path)
+                else:
+                    file_path.unlink()
             _ensure_parent(file_path)
             shutil.copy2(backup_path, file_path)
             restored += 1

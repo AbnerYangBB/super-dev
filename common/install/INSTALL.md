@@ -26,7 +26,7 @@
 10. Trae rules 仅写入 `.trae/rules/super-dev-rules.md` 的受管区块，不整文件覆盖。
 11. `mcp.json` 仅补充缺失 key，保留用户已有 MCP 配置。
 12. Trae skills 仅写入 `.trae/skills/`，不触碰其他目录。
-13. Cursor rules 仅写入 `.cursor/rules/super-dev.mdc` 的受管区块，不整文件覆盖。
+13. Cursor rules 仅增量同步到 `.cursor/rules/agents.md`，不整文件覆盖。
 14. `.cursor/mcp.json` 仅补充缺失 key，保留用户已有 MCP 配置。
 15. Cursor skills 仅写入 `.agents/skills/<namespace>/`，不触碰其他目录。
 
@@ -250,12 +250,12 @@ python3 "$TEMPLATE_DIR/common/install/scripts/portable_apply.py" \
 3. `web/skills/** -> .trae/skills/**`
 
 ## Installed Targets (cursor-ios)
-1. `ios/cursor/rules/super-dev.mdc -> .cursor/rules/super-dev.mdc`
+1. `ios/cursor/rules/agents.md -> .cursor/rules/agents.md`
 2. `ios/cursor/mcp.json -> .cursor/mcp.json`
 3. `ios/skills/** -> .agents/skills/<namespace>/**`
 
 ## Installed Targets (cursor-web)
-1. `web/cursor/rules/super-dev.mdc -> .cursor/rules/super-dev.mdc`
+1. `web/cursor/rules/agents.md -> .cursor/rules/agents.md`
 2. `web/cursor/mcp.json -> .cursor/mcp.json`
 3. `web/skills/** -> .agents/skills/<namespace>/**`
 

@@ -91,6 +91,29 @@ class TestInstallerE2E(unittest.TestCase):
             )
             self.assertEqual(trae_rollback.returncode, 0, msg=trae_rollback.stderr)
 
+            cursor_apply = self._run(
+                "python3",
+                str(apply_script),
+                "--project-root",
+                str(project),
+                "--template-root",
+                str(REPO_ROOT),
+                "--profile",
+                "cursor-ios",
+                "--namespace",
+                "super-dev",
+            )
+            self.assertEqual(cursor_apply.returncode, 0, msg=cursor_apply.stderr)
+            self.assertEqual(json.loads(cursor_apply.stdout)["status"], "ok")
+
+            cursor_rollback = self._run(
+                "python3",
+                str(rollback_script),
+                "--project-root",
+                str(project),
+            )
+            self.assertEqual(cursor_rollback.returncode, 0, msg=cursor_rollback.stderr)
+
             codex_web_apply = self._run(
                 "python3",
                 str(apply_script),
@@ -159,6 +182,29 @@ class TestInstallerE2E(unittest.TestCase):
                 str(project),
             )
             self.assertEqual(trae_web_rollback.returncode, 0, msg=trae_web_rollback.stderr)
+
+            cursor_web_apply = self._run(
+                "python3",
+                str(apply_script),
+                "--project-root",
+                str(project),
+                "--template-root",
+                str(REPO_ROOT),
+                "--profile",
+                "cursor-web",
+                "--namespace",
+                "super-dev-web",
+            )
+            self.assertEqual(cursor_web_apply.returncode, 0, msg=cursor_web_apply.stderr)
+            self.assertEqual(json.loads(cursor_web_apply.stdout)["status"], "ok")
+
+            cursor_web_rollback = self._run(
+                "python3",
+                str(rollback_script),
+                "--project-root",
+                str(project),
+            )
+            self.assertEqual(cursor_web_rollback.returncode, 0, msg=cursor_web_rollback.stderr)
 
     def test_codex_ios_and_web_can_coexist_in_same_project(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -3,9 +3,9 @@
   "actions": [
     {
       "id": "cursor-rules",
-      "src": "web/cursor/rules/super-dev.mdc",
+      "src": "web/cursor/rules",
       "target": "cursor_rules_dir",
-      "strategy": "append_block"
+      "strategy": "sync_additive_dir"
     },
     {
       "id": "cursor-mcp",

@@ -39,7 +39,7 @@ def _memory_target(platform: str) -> str:
     if platform == "trae-ide":
         return ".trae/rules/super-dev-rules.md"
     if platform == "cursor-ide":
-        return ".cursor/rules/super-dev.mdc"
+        return ".cursor/rules/agents.md"
     raise DispatchError(f"Unsupported platform: {platform}")
 
 

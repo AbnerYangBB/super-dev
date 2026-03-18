@@ -105,7 +105,7 @@ def _resolve_template_path(repo_root: pathlib.Path, platform: str, target: str, 
         }
     elif platform == "cursor-ide":
         mapping = {
-            ".cursor/rules/super-dev.mdc": repo_root / domain_root / "cursor" / "rules" / "super-dev.mdc",
+            ".cursor/rules/agents.md": repo_root / domain_root / "cursor" / "rules" / "agents.md",
             ".cursor/mcp.json": repo_root / domain_root / "cursor" / "mcp.json",
             ".agents/skills": repo_root / domain_root / "skills",
         }

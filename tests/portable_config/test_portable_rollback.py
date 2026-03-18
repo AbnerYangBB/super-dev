@@ -132,6 +132,23 @@ class TestPortableRollback(unittest.TestCase):
         )
         self.assertFalse(trae_skill.exists())
 
+    def test_rollback_restores_legacy_cursor_rules_file_after_migration(self):
+        legacy_rules = self.project_root / ".cursor" / "rules"
+        legacy_rules.parent.mkdir(parents=True, exist_ok=True)
+        original_legacy_content = "# legacy cursor rules file\n"
+        legacy_rules.write_text(original_legacy_content, encoding="utf-8")
+
+        apply_result = self._run_apply(profile="cursor-ios")
+        self.assertEqual(apply_result.returncode, 0, msg=apply_result.stderr)
+        self.assertTrue((self.project_root / ".cursor" / "rules" / "agents.md").exists())
+
+        rollback_result = self._run_rollback()
+        self.assertEqual(rollback_result.returncode, 0, msg=rollback_result.stderr)
+
+        self.assertTrue((self.project_root / ".cursor" / "rules").is_file())
+        self.assertEqual((self.project_root / ".cursor" / "rules").read_text(encoding="utf-8"), original_legacy_content)
+        self.assertFalse((self.project_root / ".cursor" / "rules" / "agents.md").exists())
+
 
 if __name__ == "__main__":
     unittest.main()

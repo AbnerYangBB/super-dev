@@ -32,7 +32,7 @@ class TestPortableDispatch(unittest.TestCase):
         self.assertEqual(result["trae-ide"][0]["operation"], "append_block")
         self.assertEqual(result["cursor-ide"][0]["operation"], "append_block")
         self.assertEqual(result["trae-ide"][0]["target"], ".trae/rules/super-dev-rules.md")
-        self.assertEqual(result["cursor-ide"][0]["target"], ".cursor/rules/super-dev.mdc")
+        self.assertEqual(result["cursor-ide"][0]["target"], ".cursor/rules/agents.md")
 
     def test_dispatch_instruction_intent_generates_memory_actions(self):
         matrix = DISPATCHER.load_capability_matrix(REPO_ROOT)
@@ -49,7 +49,7 @@ class TestPortableDispatch(unittest.TestCase):
         self.assertEqual(result["claude-code"][0]["target"], "CLAUDE.md")
         self.assertEqual(result["codex-cli"][0]["target"], "AGENTS.md")
         self.assertEqual(result["trae-ide"][0]["target"], ".trae/rules/super-dev-rules.md")
-        self.assertEqual(result["cursor-ide"][0]["target"], ".cursor/rules/super-dev.mdc")
+        self.assertEqual(result["cursor-ide"][0]["target"], ".cursor/rules/agents.md")
 
     def test_dispatch_mcp_uses_intent_metadata_payload(self):
         matrix = DISPATCHER.load_capability_matrix(REPO_ROOT)

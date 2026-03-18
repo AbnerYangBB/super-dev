@@ -246,6 +246,43 @@ class TestPortableApply(unittest.TestCase):
         txn = state["transactions"][0]
         self.assertEqual(txn["profile"], "trae-ios")
 
+    def test_apply_cursor_profile_creates_agents_file_in_rules_directory(self):
+        result = self._run_apply(profile="cursor-ios")
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "ok")
+        self.assertEqual(payload["conflicts"], 0)
+        self.assertEqual(payload["state_file"], ".cursor/portable/state.json")
+
+        rules_dir = self.project_root / ".cursor" / "rules"
+        self.assertTrue(rules_dir.is_dir())
+
+        agents_path = rules_dir / "agents.md"
+        self.assertTrue(agents_path.exists())
+        expected = (REPO_ROOT / "ios" / "codex" / "AGENTS.md").read_text(encoding="utf-8")
+        self.assertEqual(agents_path.read_text(encoding="utf-8"), expected)
+
+        self.assertFalse((self.project_root / ".cursor" / "rules.md").exists())
+        self.assertFalse((self.project_root / ".cursor" / "rules").is_file())
+
+    def test_apply_cursor_profile_migrates_legacy_rules_file(self):
+        legacy_rules = self.project_root / ".cursor" / "rules"
+        legacy_rules.parent.mkdir(parents=True, exist_ok=True)
+        legacy_rules.write_text("# legacy cursor rules file\n", encoding="utf-8")
+
+        result = self._run_apply(profile="cursor-ios")
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+
+        rules_dir = self.project_root / ".cursor" / "rules"
+        self.assertTrue(rules_dir.is_dir())
+        self.assertFalse(legacy_rules.is_file())
+
+        agents_path = rules_dir / "agents.md"
+        self.assertTrue(agents_path.exists())
+        expected = (REPO_ROOT / "ios" / "codex" / "AGENTS.md").read_text(encoding="utf-8")
+        self.assertEqual(agents_path.read_text(encoding="utf-8"), expected)
+
     def test_apply_profiles_include_generated_pre_commit_localization_behavior(self):
         codex_result = self._run_apply(profile="codex-ios")
         self.assertEqual(codex_result.returncode, 0, msg=codex_result.stderr)

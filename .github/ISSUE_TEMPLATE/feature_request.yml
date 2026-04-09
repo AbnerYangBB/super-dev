@@ -21,4 +21,4 @@ body:
     id: risk
     attributes:
       label: 风险评估
-      description: 是否会影响现有安装/回退兼容性
+      description: 是否会影响 `skills/` 同步边界、路径安全或 `.agents/skills/super-dev/` 命名空间

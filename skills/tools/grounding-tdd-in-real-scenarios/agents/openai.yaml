@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ground TDD in Real Scenarios"
+  short_description: "Clarify the real goal before adding TDD scenario coverage"
+  default_prompt: "Use $grounding-tdd-in-real-scenarios to clarify the real user goal before expanding this TDD plan with real-scenario coverage."

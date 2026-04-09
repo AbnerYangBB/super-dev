@@ -1,5 +1,5 @@
 name: Bug Report
-description: 报告安装/回退或文档行为问题
+description: 报告 skills 同步、路径安全或文档问题
 title: "bug: "
 labels: [bug]
 body:
@@ -21,4 +21,4 @@ body:
     id: env
     attributes:
       label: 环境信息
-      description: OS、Python 版本、仓库分支/commit
+      description: OS、Python 版本、仓库分支/commit、目标工作区信息

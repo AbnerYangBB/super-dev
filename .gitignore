@@ -7,9 +7,3 @@ __pycache__/
 
 # Local temp
 tmp/
-
-# Legacy project-local template cache
-.codex/portable/template/
-
-# Verification artifacts
-tests/verification/blackbox-report.json

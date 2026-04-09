@@ -1,196 +1,117 @@
 # super-dev
 
-可移植的 AI 工程配置仓库，当前支持 iOS 与 web 开发场景。
-项目本身由 AI 自动生成，使用 https://github.com/obra/superpowers skills 框架（建议安装）。
+`super-dev` 现在是一个极简的 skills 仓库。
 
-## 状态声明
+它只做一件事：把仓库里的 `skills/` 全量同步到目标工作区的 `.agents/skills/super-dev/`。
 
-- 目前仅用于自用。
-- 可能存在风险（包含但不限于：提示词行为偏差、安装流程变更、与目标项目配置冲突）。
-- 使用前请先在测试项目验证，再应用到正式项目。
+## 仓库边界
 
-## 当前支持范围
+本仓库会：
 
-- 历史基线：仅支持 iOS 工程的 Codex / Claude / Trae 配置。
-- 支持 Codex / Claude / Trae / Cursor 的 iOS 与 web 配置。
-- iOS profiles：`codex-ios`、`claude-ios`、`trae-ios`、`cursor-ios`。
-- web profiles：`codex-web`、`claude-web`、`trae-web`、`cursor-web`。
-- 支持安装、更新、回滚，以及通过分发器把自然语言请求写入 `ios/...` 或 `web/...` 模板。
-- 共装策略：
-  - iOS 与 web 可安装到同一目标项目。
-  - 共享文件继续采用受管区块追加与缺失 key 合并，不覆盖用户已有配置。
-  - 回退默认回退“最近一次事务”，例如最后装的是 `codex-web`，则只回退 web 这一笔。
+- 维护可复用的 `skills/`
+- 提供一个同步脚本 `scripts/sync_skills.py`
+- 通过一次同步完成安装或更新
 
-## 开箱即用
+本仓库不会：
 
-把下面提示词直接贴给 AI（在你的目标项目目录执行）。
+- 区分 `Codex`、`Claude`、`Cursor`、`Trae`
+- 区分 `iOS`、`web` 或其他 profile
+- 写入 `AGENTS.md`、`CLAUDE.md`、`.codex/config.toml`、`.cursor/rules/*`、`mcp.json` 等其他 AI 配置
+- 提供安装事务、回滚或自然语言分发器
 
-### 安装 Codex iOS
+## 目标路径
+
+仓库内：
 
 ```text
-Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile codex-ios in current project
+skills/ios/swift/swiftui-patterns/SKILL.md
 ```
 
-### 安装 Claude iOS
+同步后会落到目标工作区：
 
 ```text
-Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile claude-ios in current project
+.agents/skills/super-dev/ios/swift/swiftui-patterns/SKILL.md
 ```
 
-### 安装 Trae iOS
+目录层级保持原样，只是整体挂到 `.agents/skills/super-dev/` 下面。
+
+## 快速使用
+
+### AI 快速指令
+
+在目标项目根目录，把下面这段话直接给 AI：
 
 ```text
-Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile trae-ios in current project
+Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/INSTALL.md and sync super-dev skills into current project.
 ```
 
-### 安装 Codex web
+### 本地手动使用
+
+如果你是自己手动执行，可以直接参考根目录 `INSTALL.md`，或者先 clone 仓库，再在仓库根目录运行：
+
+```bash
+python3 scripts/sync_skills.py --workspace-root "<你的目标工程目录>"
+```
+
+### 先预览再同步
+
+```bash
+python3 scripts/sync_skills.py --workspace-root "<你的目标工程目录>" --dry-run
+```
+
+## 更新方式
+
+没有“安装”和“更新”的区别。
+
+对同一个工作区重复执行同一条短指令，就是更新：
 
 ```text
-Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile codex-web in current project
+Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/INSTALL.md and sync super-dev skills into current project.
 ```
 
-### 安装 Claude web
+如果你是手动执行，则重复运行同一条命令即可：
 
-```text
-Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile claude-web in current project
+```bash
+python3 scripts/sync_skills.py --workspace-root "<你的目标工程目录>"
 ```
 
-### 安装 Trae web
+脚本会：
 
-```text
-Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile trae-web in current project
-```
+- 复制新增或变更的文件
+- 只在 `.agents/skills/super-dev/` 内删除已过期的旧文件
+- 不触碰 `.agents/skills/` 下其他命名空间
 
-### 安装 Cursor iOS
+## 输出格式
 
-```text
-Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile cursor-ios in current project
-```
+脚本会输出 JSON 摘要，至少包含：
 
-### 安装 Cursor web
+- `status`
+- `workspace_root`
+- `source_root`
+- `target_root`
+- `copied`
+- `deleted`
+- `dry_run`
 
-```text
-Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile cursor-web in current project
-```
+## 安全约束
 
-### 更新（重复安装即可）
+同步脚本只允许：
 
-```text
-Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile codex-ios in current project as update
-```
+- 读取本仓库中的 `skills/`
+- 写入目标工作区中的 `.agents/skills/super-dev/`
 
-```text
-Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile claude-ios in current project as update
-```
-
-```text
-Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile trae-ios in current project as update
-```
-
-```text
-Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile codex-web in current project as update
-```
-
-```text
-Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile claude-web in current project as update
-```
-
-```text
-Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile trae-web in current project as update
-```
-
-```text
-Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile cursor-ios in current project as update
-```
-
-```text
-Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/INSTALL.md and install profile cursor-web in current project as update
-```
-
-## 卸载
-
-```text
-Fetch and follow instructions from https://raw.githubusercontent.com/AbnerYangBB/super-dev/main/common/install/ROLLBACK.md and rollback latest transaction
-```
-
-## 功能定制
-
-目标：你在自己的 fork 里定制能力，然后让 AI 把新能力重新更新到目标项目。
-
-### 1) 先 fork 本仓库
-
-在 GitHub 上 fork 一份你自己的仓库。
-
-### 2) 在 fork 里让 AI 定制能力
-
-```text
-In this fork repository, use .agents/skills/platform-feature-dispatcher to customize feature request: "<你的需求>" for codex, claude, trae and cursor. Run dry-run first, then apply template changes, and summarize changed files.
-```
-
-示例需求：
-
-```text
-增加一个 Hook: 提交前使用 sync-add-ios-loc 做本地化校验
-```
-
-```text
-增加一个 MCP server: lint-server command: uvx args: lint-mcp --stdio 仅 codex
-```
-
-```text
-增加一条 web instruction: 使用 frontend-design 处理页面设计
-```
-
-### 3) 在目标项目重新更新
-
-```text
-Read and follow instructions from /path/to/your-fork/common/install/INSTALL.md and install profile codex-ios in current project using template root /path/to/your-fork. Do not clone remote repository.
-```
-
-```text
-Read and follow instructions from /path/to/your-fork/common/install/INSTALL.md and install profile claude-ios in current project using template root /path/to/your-fork. Do not clone remote repository.
-```
-
-```text
-Read and follow instructions from /path/to/your-fork/common/install/INSTALL.md and install profile trae-ios in current project using template root /path/to/your-fork. Do not clone remote repository.
-```
-
-```text
-Read and follow instructions from /path/to/your-fork/common/install/INSTALL.md and install profile codex-web in current project using template root /path/to/your-fork. Do not clone remote repository.
-```
-
-```text
-Read and follow instructions from /path/to/your-fork/common/install/INSTALL.md and install profile claude-web in current project using template root /path/to/your-fork. Do not clone remote repository.
-```
-
-```text
-Read and follow instructions from /path/to/your-fork/common/install/INSTALL.md and install profile trae-web in current project using template root /path/to/your-fork. Do not clone remote repository.
-```
-
-```text
-Read and follow instructions from /path/to/your-fork/common/install/INSTALL.md and install profile cursor-ios in current project using template root /path/to/your-fork. Do not clone remote repository.
-```
-
-```text
-Read and follow instructions from /path/to/your-fork/common/install/INSTALL.md and install profile cursor-web in current project using template root /path/to/your-fork. Do not clone remote repository.
-```
+如果你发现它会覆盖其他目录、穿透符号链接，或会影响业务代码，请不要继续执行，先提 issue 或私下反馈。
 
 ## 常见问题
 
-1. 我是初级开发，真的不看脚本也能用吗？
-- 可以。按上面的 AI 提示词直接执行即可。
+### 为什么不再区分平台？
 
-2. 更新为什么也是安装提示词？
-- 这是设计行为：同一个 profile 再执行一次安装就是更新。
+因为这个仓库现在只负责同步 `skills/`，不再负责任何平台配置分发。
 
-3. Claude 执行后文件写错目录怎么办？
-- 让 AI 在“目标项目目录”执行，不要在模板仓库目录执行。
+### 为什么没有回滚？
 
-4. Codex 提示 “Not inside a trusted directory” 怎么办？
-- 在 Codex 命令里增加 `--skip-git-repo-check`，或先在受信任仓库目录执行。
+因为本仓库不再维护安装事务系统。它只同步 `skills/` 目录。
 
-5. 提示词执行失败怎么办？
-- 先让 AI 输出错误日志，再把日志贴回 issue 或本地排查。
+### 会不会动到我已有的其他 skills？
 
-6. iOS 和 web 可以一起装吗？
-- 可以。建议按需要分别执行 `*-ios` 和 `*-web` profile；若要回退其中一个，注意回退默认只撤销最近一次安装事务。
+不会。脚本只会处理 `.agents/skills/super-dev/` 这一棵目录。

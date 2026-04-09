@@ -4,31 +4,43 @@
 
 ## 当前策略
 
-- 本仓库目前仅用于自用，功能路线以作者需求为先。
-- 外部 PR 可能被延后处理或不合并，请理解。
+- 本仓库目前仍以自用为主。
+- 外部 PR 可能不会立即处理，请理解。
+- 变更应围绕 `skills/` 内容、同步脚本或仓库说明展开，不要引入额外平台分发逻辑。
 
-## 提交流程建议
+## 贡献边界
 
-1. 先提 issue 说明背景与目标。
-2. 变更保持最小化，避免引入与目标无关的重构。
-3. 需要补充对应测试（安装/回退/文档约束/分发器黑盒）。
-4. 提交前运行：
+可以改：
+
+- `skills/` 下的内容
+- `scripts/sync_skills.py`
+- `README.md`、`CONTRIBUTING.md`、`SECURITY.md`
+- `.github/` 下与仓库说明或最小验证相关的文件
+
+不要加回：
+
+- 平台区分
+- profile 安装器
+- 回滚事务
+- 分发器或模板生成器
+- 会写入 `.agents/skills/super-dev/` 以外路径的逻辑
+
+## 最小验证
+
+提交前至少执行一次 dry-run 和一次真实同步：
 
 ```bash
-bash scripts/verification/run_all.sh
-python3 scripts/verification/run_skill_blackbox.py --repo-root . --cases tests/verification/skill_blackbox_cases.json --pretty
+python3 scripts/sync_skills.py --workspace-root /tmp/super-dev-verify --dry-run
+python3 scripts/sync_skills.py --workspace-root /tmp/super-dev-verify
 ```
 
-## 小白闭环验收（建议）
+如果你改了文档或 `.github/`，还要确认它们没有残留旧模型表述，例如安装、回滚、多平台 profile。
 
-如改动涉及分发器、安装或文档，建议额外执行一次真实流程：
+## 文档同步要求
 
-1. fork 副本中用 `platform-feature-dispatcher` 生成模板变更。
-2. 在目标项目分别执行 `codex-ios` / `claude-ios` 安装。
-3. 再执行一次安装作为更新。
-4. 执行回退，确认 `status=ok`。
+如果你的改动影响了行为边界或使用方式，请同步更新：
 
-## 文档要求
-
-- 涉及行为变更时，需同步更新 `README.md` 和 `common/install/*.md`。
-- 涉及能力边界变化时，需同步更新 `README.md` 的“指令识别范围/能力边界/FAQ”。
+- `README.md`
+- `CONTRIBUTING.md`
+- `SECURITY.md`
+- `.github/` 中受影响的 issue template、PR template 或 workflow

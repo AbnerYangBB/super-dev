@@ -7,7 +7,7 @@ on:
   pull_request:
 
 jobs:
-  test:
+  sync-smoke:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -18,20 +18,21 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Run full verification suite
-        run: bash scripts/verification/run_all.sh
+      - name: Dry-run sync
+        run: python3 scripts/sync_skills.py --workspace-root "$RUNNER_TEMP/workspace" --dry-run
 
-      - name: Run skill blackbox
-        run: |
-          python3 scripts/verification/run_skill_blackbox.py \
-            --repo-root . \
-            --cases tests/verification/skill_blackbox_cases.json \
-            --pretty
+      - name: Real sync
+        run: python3 scripts/sync_skills.py --workspace-root "$RUNNER_TEMP/workspace"
 
-      - name: Run agent CLI blackbox smoke (script sanity)
+      - name: Verify target root contains synced skills
         run: |
-          bash scripts/verification/run_agent_cli_blackbox.sh \
-            --repo-root . \
-            --skip-codex \
-            --skip-claude \
-            --pretty
+          test -d "$RUNNER_TEMP/workspace/.agents/skills/super-dev"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          root = Path(os.environ["RUNNER_TEMP"]) / "workspace" / ".agents" / "skills" / "super-dev"
+          has_skill = any(path.name == "SKILL.md" for path in root.rglob("*"))
+          if not has_skill:
+              raise SystemExit("No synced SKILL.md files found")
+          PY

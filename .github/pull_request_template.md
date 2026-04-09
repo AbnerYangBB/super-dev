@@ -8,11 +8,11 @@
 
 ## Test Plan
 
-- [ ] `python3 -m unittest discover -s tests -p 'test_*.py' -v`
-- [ ] 手动验证安装流程（如有）
-- [ ] 手动验证回退流程（如有）
+- [ ] `python3 scripts/sync_skills.py --workspace-root /tmp/super-dev-pr-check --dry-run`
+- [ ] `python3 scripts/sync_skills.py --workspace-root /tmp/super-dev-pr-check`
+- [ ] 手动确认只写入 `.agents/skills/super-dev/`
 
 ## Risk
 
-- [ ] 仅影响 AI 配置文件
+- [ ] 仅影响 `.agents/skills/super-dev/`
 - [ ] 不影响业务代码

@@ -13,7 +13,7 @@
       "tracking_ref": "refs/heads/main",
       "resolved_commit": "63d08d51f792d53feec8c1c06897cee870e83c18",
       "resolved_tag": null,
-      "applied_commit": null,
+      "applied_commit": "63d08d51f792d53feec8c1c06897cee870e83c18",
       "applied_tag": null
     },
     {
@@ -28,7 +28,7 @@
       "tracking_ref": "refs/heads/main",
       "resolved_commit": "27a7ed95755a5c3a2948694343a8e2cd7a7ef6fb",
       "resolved_tag": null,
-      "applied_commit": null,
+      "applied_commit": "27a7ed95755a5c3a2948694343a8e2cd7a7ef6fb",
       "applied_tag": null
     },
     {
@@ -43,7 +43,7 @@
       "tracking_ref": "refs/heads/main",
       "resolved_commit": "5516b8ad07393f35af4b50238b9d3f7cceca5f1e",
       "resolved_tag": null,
-      "applied_commit": null,
+      "applied_commit": "5516b8ad07393f35af4b50238b9d3f7cceca5f1e",
       "applied_tag": null
     },
     {
@@ -88,7 +88,7 @@
       "tracking_ref": "refs/heads/main",
       "resolved_commit": "63d08d51f792d53feec8c1c06897cee870e83c18",
       "resolved_tag": null,
-      "applied_commit": null,
+      "applied_commit": "63d08d51f792d53feec8c1c06897cee870e83c18",
       "applied_tag": null
     },
     {
@@ -103,7 +103,7 @@
       "tracking_ref": "refs/heads/main",
       "resolved_commit": "4e66b2882da9afb9747468b08a253ca2f09c85f3",
       "resolved_tag": null,
-      "applied_commit": null,
+      "applied_commit": "4e66b2882da9afb9747468b08a253ca2f09c85f3",
       "applied_tag": null
     },
     {
@@ -118,7 +118,7 @@
       "tracking_ref": "refs/heads/main",
       "resolved_commit": "dc2be825d8b439caea78e9eaa8fb3ac23b0ff3e9",
       "resolved_tag": null,
-      "applied_commit": null,
+      "applied_commit": "dc2be825d8b439caea78e9eaa8fb3ac23b0ff3e9",
       "applied_tag": null
     },
     {
@@ -133,7 +133,7 @@
       "tracking_ref": "refs/heads/main",
       "resolved_commit": "b156f4ca73c03d0350438bfd042331aaef6eec77",
       "resolved_tag": null,
-      "applied_commit": null,
+      "applied_commit": "b156f4ca73c03d0350438bfd042331aaef6eec77",
       "applied_tag": null
     },
     {
@@ -148,7 +148,7 @@
       "tracking_ref": "refs/heads/main",
       "resolved_commit": "47f47c12e62f62b5e171bd5af61d0fc24b329701",
       "resolved_tag": null,
-      "applied_commit": null,
+      "applied_commit": "47f47c12e62f62b5e171bd5af61d0fc24b329701",
       "applied_tag": null
     },
     {
@@ -163,7 +163,7 @@
       "tracking_ref": "refs/heads/main",
       "resolved_commit": "fed9617111260e19f4f54b72a2874a3f3de8ff94",
       "resolved_tag": null,
-      "applied_commit": null,
+      "applied_commit": "fed9617111260e19f4f54b72a2874a3f3de8ff94",
       "applied_tag": null
     },
     {
@@ -178,7 +178,7 @@
       "tracking_ref": "refs/heads/main",
       "resolved_commit": "e61a091411c082dd7dbc9b82c0d45557f0d15ade",
       "resolved_tag": null,
-      "applied_commit": null,
+      "applied_commit": "e61a091411c082dd7dbc9b82c0d45557f0d15ade",
       "applied_tag": null
     },
     {
@@ -193,7 +193,7 @@
       "tracking_ref": "refs/heads/main",
       "resolved_commit": "27a7ed95755a5c3a2948694343a8e2cd7a7ef6fb",
       "resolved_tag": null,
-      "applied_commit": null,
+      "applied_commit": "27a7ed95755a5c3a2948694343a8e2cd7a7ef6fb",
       "applied_tag": null
     },
     {
@@ -208,7 +208,7 @@
       "tracking_ref": "refs/heads/main",
       "resolved_commit": "47f47c12e62f62b5e171bd5af61d0fc24b329701",
       "resolved_tag": null,
-      "applied_commit": null,
+      "applied_commit": "47f47c12e62f62b5e171bd5af61d0fc24b329701",
       "applied_tag": null
     },
     {
@@ -223,7 +223,7 @@
       "tracking_ref": "refs/heads/main",
       "resolved_commit": "4e66b2882da9afb9747468b08a253ca2f09c85f3",
       "resolved_tag": null,
-      "applied_commit": null,
+      "applied_commit": "4e66b2882da9afb9747468b08a253ca2f09c85f3",
       "applied_tag": null
     },
     {
@@ -238,7 +238,7 @@
       "tracking_ref": "refs/heads/main",
       "resolved_commit": "4e66b2882da9afb9747468b08a253ca2f09c85f3",
       "resolved_tag": null,
-      "applied_commit": null,
+      "applied_commit": "4e66b2882da9afb9747468b08a253ca2f09c85f3",
       "applied_tag": null
     },
     {
@@ -253,7 +253,7 @@
       "tracking_ref": "refs/heads/main",
       "resolved_commit": "4e66b2882da9afb9747468b08a253ca2f09c85f3",
       "resolved_tag": null,
-      "applied_commit": null,
+      "applied_commit": "4e66b2882da9afb9747468b08a253ca2f09c85f3",
       "applied_tag": null
     },
     {
@@ -268,7 +268,7 @@
       "tracking_ref": "refs/heads/main",
       "resolved_commit": "4e66b2882da9afb9747468b08a253ca2f09c85f3",
       "resolved_tag": null,
-      "applied_commit": null,
+      "applied_commit": "4e66b2882da9afb9747468b08a253ca2f09c85f3",
       "applied_tag": null
     },
     {
@@ -283,7 +283,7 @@
       "tracking_ref": "refs/heads/main",
       "resolved_commit": "4e66b2882da9afb9747468b08a253ca2f09c85f3",
       "resolved_tag": null,
-      "applied_commit": null,
+      "applied_commit": "4e66b2882da9afb9747468b08a253ca2f09c85f3",
       "applied_tag": null
     },
     {
@@ -298,7 +298,7 @@
       "tracking_ref": "refs/heads/main",
       "resolved_commit": "4e66b2882da9afb9747468b08a253ca2f09c85f3",
       "resolved_tag": null,
-      "applied_commit": null,
+      "applied_commit": "4e66b2882da9afb9747468b08a253ca2f09c85f3",
       "applied_tag": null
     },
     {
@@ -313,7 +313,7 @@
       "tracking_ref": "refs/heads/main",
       "resolved_commit": "b741777286ee389f26f3f2641aedaec696b31d83",
       "resolved_tag": null,
-      "applied_commit": null,
+      "applied_commit": "b741777286ee389f26f3f2641aedaec696b31d83",
       "applied_tag": null
     },
     {
@@ -328,7 +328,7 @@
       "tracking_ref": "refs/heads/main",
       "resolved_commit": "4e66b2882da9afb9747468b08a253ca2f09c85f3",
       "resolved_tag": null,
-      "applied_commit": null,
+      "applied_commit": "4e66b2882da9afb9747468b08a253ca2f09c85f3",
       "applied_tag": null
     },
     {
@@ -358,7 +358,7 @@
       "tracking_ref": "refs/heads/main",
       "resolved_commit": "b7e3af80f6e331f6fb456667b82b12cade7c9d35",
       "resolved_tag": null,
-      "applied_commit": null,
+      "applied_commit": "b7e3af80f6e331f6fb456667b82b12cade7c9d35",
       "applied_tag": null
     },
     {
@@ -373,7 +373,7 @@
       "tracking_ref": "refs/heads/main",
       "resolved_commit": "ce3e64e468f8fa09a2d075d102771838061fdac0",
       "resolved_tag": null,
-      "applied_commit": null,
+      "applied_commit": "ce3e64e468f8fa09a2d075d102771838061fdac0",
       "applied_tag": null
     },
     {
@@ -403,7 +403,7 @@
       "tracking_ref": "refs/heads/main",
       "resolved_commit": "b9e19e6f44773509fbdd7001d77ff41a49a486c1",
       "resolved_tag": null,
-      "applied_commit": null,
+      "applied_commit": "b9e19e6f44773509fbdd7001d77ff41a49a486c1",
       "applied_tag": null
     }
   ]

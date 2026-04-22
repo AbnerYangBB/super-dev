@@ -1,14 +1,11 @@
-# Super-Dev Skills Sync Install Flow
+# Super-Dev Sync Install Flow
 
 ## Purpose
 
-将本仓库中的 `skills/` 全量同步到当前工作区的：
+将本仓库中的内容同步到当前工作区：
 
-```text
-.agents/skills/super-dev/
-```
-
-只允许修改这一路径，不允许改动任何其他文件。
+- `skills/` -> `.agents/skills/super-dev/`
+- `agent/` 目录内容 -> `project_root/`（根目录展开，不创建 `project_root/agent/`）
 
 ## Inputs
 
@@ -17,11 +14,12 @@
 
 ## Hard Rules
 
-1. 只允许写入 `project_root/.agents/skills/super-dev/`
-2. 不允许修改业务代码或任何其他 AI 配置文件
+1. 允许写入 `project_root/.agents/skills/super-dev/`
+2. 允许写入 `project_root/`（仅用于 `agent/` 对应路径）
 3. 必须先执行 dry-run，再执行真实同步
 4. 同步完成后删除临时 clone 目录
 5. 最终必须把 dry-run 和真实同步的 JSON 结果展示出来
+6. 同步 `agent/` 时若有同名冲突，必须先把用户现有文件/目录重命名为 `*-bak`（文件保持原后缀）后再写入
 
 ## Execution Flow
 
@@ -52,7 +50,7 @@ rm -rf "$TMP_DIR"
 
 1. dry-run 输出 JSON
 2. 真实同步输出 JSON
-3. 只影响 `.agents/skills/super-dev/`
+3. 影响范围仅限 `.agents/skills/super-dev/` 与 `agent/` 对应到根目录的目标路径
 4. 临时 clone 目录已删除
 
 ## Update

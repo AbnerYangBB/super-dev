@@ -10,15 +10,16 @@
 
 它只应该：
 
-- 读取仓库内的 `skills/`
+- 读取仓库内的 `skills/` 与 `agent/`
 - 写入目标工作区的 `.agents/skills/super-dev/`
+- 写入目标工作区根目录中由 `agent/` 映射出的目标路径
 
 它不应该：
 
-- 写入业务代码
 - 覆盖 `.agents/skills/` 下其他命名空间
 - 跟随符号链接写到目标目录之外
 - 删除 `.agents/skills/super-dev/` 之外的任何文件
+- 在 `agent/` 同步发生冲突时跳过备份重命名直接覆盖用户文件
 
 ## Reporting a Vulnerability
 

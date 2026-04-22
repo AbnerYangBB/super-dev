@@ -15,7 +15,11 @@ IGNORED_SUFFIXES = {".pyc"}
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Sync repository skills to a workspace .agents/skills/super-dev directory."
+        description=(
+            "Sync repository skills to workspace .agents/skills/super-dev and "
+            "sync repository agent/ contents into workspace root (without the "
+            "agent directory itself)."
+        )
     )
     parser.add_argument(
         "--workspace-root",
@@ -34,11 +38,15 @@ def repo_root() -> Path:
     return Path(__file__).resolve().parent.parent
 
 
-def source_root() -> Path:
+def source_skills_root() -> Path:
     return repo_root() / "skills"
 
 
-def target_root(workspace_root: Path) -> Path:
+def source_agent_root() -> Path:
+    return repo_root() / "agent"
+
+
+def target_skills_root(workspace_root: Path) -> Path:
     return workspace_root / ".agents" / "skills" / "super-dev"
 
 
@@ -92,34 +100,91 @@ def remove_empty_dirs(root: Path) -> None:
             path.rmdir()
 
 
-def main() -> int:
-    args = parse_args()
+def split_name_and_suffixes(name: str) -> tuple[str, str]:
+    suffixes = "".join(Path(name).suffixes)
+    if suffixes and name != suffixes:
+        base = name[: -len(suffixes)]
+    else:
+        base = name
+        suffixes = ""
+    return base, suffixes
 
-    workspace = Path(args.workspace_root).resolve()
-    source = source_root()
-    target = target_root(workspace)
 
-    if not source.is_dir():
-        print(
-            json.dumps(
-                {
-                    "status": "error",
-                    "message": f"Source skills directory does not exist: {source}",
-                },
-                ensure_ascii=True,
-                indent=2,
-            ),
-            file=sys.stderr,
-        )
-        return 1
+def backup_name(name: str, index: int = 0) -> str:
+    base, suffixes = split_name_and_suffixes(name)
+    marker = "-bak" if index == 0 else f"-bak-{index + 1}"
+    return f"{base}{marker}{suffixes}"
 
+
+def build_backup_path(path: Path) -> Path:
+    index = 0
+    while True:
+        candidate = path.with_name(backup_name(path.name, index=index))
+        if not candidate.exists():
+            return candidate
+        index += 1
+
+
+def backup_path(path: Path, dry_run: bool) -> Path:
+    if path.is_symlink():
+        raise ValueError(f"Refusing to rename symlink path: {path}")
+    destination = build_backup_path(path)
+    if not dry_run:
+        path.rename(destination)
+    return destination
+
+
+def record_backup(
+    workspace_root: Path,
+    source_path: Path,
+    backup: Path,
+    backed_up: list[dict[str, str]],
+    seen: set[tuple[str, str]],
+) -> None:
+    original_relative = source_path.relative_to(workspace_root).as_posix()
+    backup_relative = backup.relative_to(workspace_root).as_posix()
+    key = (original_relative, backup_relative)
+    if key in seen:
+        return
+    seen.add(key)
+    backed_up.append({"path": original_relative, "backup": backup_relative})
+
+
+def ensure_destination_parents(
+    workspace_root: Path,
+    destination: Path,
+    dry_run: bool,
+    backed_up: list[dict[str, str]],
+    backed_up_seen: set[tuple[str, str]],
+) -> None:
+    current = workspace_root
+    for part in destination.relative_to(workspace_root).parts[:-1]:
+        current = current / part
+        if current.exists() and not current.is_dir():
+            backup = backup_path(current, dry_run=dry_run)
+            record_backup(
+                workspace_root=workspace_root,
+                source_path=current,
+                backup=backup,
+                backed_up=backed_up,
+                seen=backed_up_seen,
+            )
+        if not dry_run:
+            current.mkdir(exist_ok=True)
+
+
+def sync_skills(
+    source: Path,
+    target: Path,
+    dry_run: bool,
+) -> dict[str, object]:
     source_files = iter_source_files(source)
     target_files = iter_target_files(target)
 
     copied: list[str] = []
     deleted: list[str] = []
 
-    if not args.dry_run:
+    if not dry_run:
         target.mkdir(parents=True, exist_ok=True)
 
     for relative_path, source_file in source_files.items():
@@ -132,7 +197,7 @@ def main() -> int:
 
         copied.append(relative_path.as_posix())
 
-        if args.dry_run:
+        if dry_run:
             continue
 
         ensure_safe_parent(target, destination)
@@ -143,7 +208,7 @@ def main() -> int:
     for relative_path in stale_paths:
         stale_path = target / relative_path
         deleted.append(relative_path.as_posix())
-        if args.dry_run:
+        if dry_run:
             continue
         if stale_path.is_symlink():
             stale_path.unlink(missing_ok=True)
@@ -152,17 +217,142 @@ def main() -> int:
         else:
             stale_path.unlink(missing_ok=True)
 
-    if not args.dry_run:
+    if not dry_run:
         remove_empty_dirs(target)
 
-    summary = {
-        "status": "ok",
-        "workspace_root": str(workspace),
+    return {
         "source_root": str(source),
         "target_root": str(target),
         "copied": copied,
         "deleted": deleted,
+    }
+
+
+def sync_agent(
+    source: Path,
+    workspace_root: Path,
+    dry_run: bool,
+) -> dict[str, object]:
+    source_files = iter_source_files(source)
+
+    copied: list[str] = []
+    backed_up: list[dict[str, str]] = []
+    backed_up_seen: set[tuple[str, str]] = set()
+
+    for relative_path, source_file in source_files.items():
+        # Agent files are copied to workspace root using paths relative to
+        # source agent root, so we never create workspace_root/agent/*.
+        if relative_path.parts and relative_path.parts[0] == "agent":
+            raise ValueError(
+                f"Invalid source path for agent sync, got nested agent prefix: "
+                f"{relative_path}"
+            )
+        destination = workspace_root / relative_path
+
+        if destination.is_symlink():
+            raise ValueError(f"Refusing to overwrite symlinked file path: {destination}")
+
+        ensure_destination_parents(
+            workspace_root,
+            destination,
+            dry_run=dry_run,
+            backed_up=backed_up,
+            backed_up_seen=backed_up_seen,
+        )
+
+        if destination.exists() and destination.is_dir():
+            backup = backup_path(destination, dry_run=dry_run)
+            record_backup(
+                workspace_root=workspace_root,
+                source_path=destination,
+                backup=backup,
+                backed_up=backed_up,
+                seen=backed_up_seen,
+            )
+
+        if destination.exists() and same_contents(source_file, destination):
+            continue
+
+        if destination.exists():
+            backup = backup_path(destination, dry_run=dry_run)
+            record_backup(
+                workspace_root=workspace_root,
+                source_path=destination,
+                backup=backup,
+                backed_up=backed_up,
+                seen=backed_up_seen,
+            )
+
+        copied.append(relative_path.as_posix())
+
+        if dry_run:
+            continue
+
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source_file, destination)
+
+    return {
+        "source_root": str(source),
+        "target_root": str(workspace_root),
+        "copied": copied,
+        "backed_up": backed_up,
+    }
+
+
+def main() -> int:
+    args = parse_args()
+
+    workspace = Path(args.workspace_root).resolve()
+    skills_source = source_skills_root()
+    agent_source = source_agent_root()
+    skills_target = target_skills_root(workspace)
+
+    if not skills_source.is_dir():
+        print(
+            json.dumps(
+                {
+                    "status": "error",
+                    "message": f"Source skills directory does not exist: {skills_source}",
+                },
+                ensure_ascii=True,
+                indent=2,
+            ),
+            file=sys.stderr,
+        )
+        return 1
+
+    if not agent_source.is_dir():
+        print(
+            json.dumps(
+                {
+                    "status": "error",
+                    "message": f"Source agent directory does not exist: {agent_source}",
+                },
+                ensure_ascii=True,
+                indent=2,
+            ),
+            file=sys.stderr,
+        )
+        return 1
+
+    skills_summary = sync_skills(
+        source=skills_source,
+        target=skills_target,
+        dry_run=args.dry_run,
+    )
+
+    agent_summary = sync_agent(
+        source=agent_source,
+        workspace_root=workspace,
+        dry_run=args.dry_run,
+    )
+
+    summary = {
+        "status": "ok",
+        "workspace_root": str(workspace),
         "dry_run": args.dry_run,
+        "skills_sync": skills_summary,
+        "agent_sync": agent_summary,
     }
     print(json.dumps(summary, ensure_ascii=True, indent=2))
     return 0

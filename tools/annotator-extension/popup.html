@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    :root { --b:#7257F5; --bd:#5A4BD0; --sos:#F2685F; --ink:#2C2840; --sub:#6B6880; }
+    * { box-sizing: border-box; }
+    body { width: 330px; margin: 0; font-family: -apple-system, "PingFang SC", "Segoe UI", sans-serif; color: var(--ink); background: #fff; }
+    .hd { padding: 14px 16px; background: linear-gradient(135deg,#7257F5,#9B6BFF); color:#fff; }
+    .hd h1 { margin: 0; font-size: 15px; font-weight: 800; display:flex; align-items:center; gap:8px; }
+    .hd .v { font-size:10px; font-weight:700; background:rgba(255,255,255,.22); padding:1px 6px; border-radius:6px; }
+    .hd p { margin: 6px 0 0; font-size: 11.5px; opacity: .9; }
+    .sec { padding: 12px 16px; border-bottom: 1px solid #F0EDF7; }
+    .row { display: flex; align-items: center; gap: 10px; }
+    .switch { display:flex; align-items:center; gap:10px; font-size:14px; font-weight:700; cursor:pointer; flex:1; }
+    .switch input { display:none; }
+    .switch .tk { width:44px; height:26px; border-radius:13px; background:#D8D2E8; position:relative; transition:.2s; }
+    .switch .tk::after { content:''; position:absolute; left:3px; top:3px; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.25); transition:.2s; }
+    .switch input:checked + .tk { background: var(--sos); }
+    .switch input:checked + .tk::after { transform: translateX(18px); }
+    .kbd { font-size: 11px; color: var(--sub); }
+    .kbd b { background:#F1EEF8; border:1px solid #E2DCF0; border-radius:5px; padding:1px 5px; color:#5A5670; }
+    .stats { display:flex; gap:10px; }
+    .stat { flex:1; background:#F7F5FC; border-radius:10px; padding:10px; text-align:center; }
+    .stat b { display:block; font-size:20px; font-weight:800; color:var(--bd); }
+    .stat span { font-size:11px; color:var(--sub); }
+    .btns { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .btn { height:38px; border:1px solid #E2DCF0; background:#fff; border-radius:10px; font-size:13px; font-weight:700; color:#45415C; cursor:pointer; }
+    .btn:hover { border-color:#C9C0EA; }
+    .btn.full { grid-column: span 2; }
+    .btn.primary { background:var(--b); border-color:var(--b); color:#fff; }
+    .btn.danger { color:var(--sos); }
+    .chk { display:flex; align-items:flex-start; gap:8px; font-size:12px; padding:6px 0; }
+    .chk .ic { width:18px; height:18px; border-radius:50%; flex:0 0 auto; display:flex; align-items:center; justify-content:center; font-size:11px; color:#fff; margin-top:1px; }
+    .chk .ic.ok { background:#2DC8A8; }
+    .chk .ic.no { background:var(--sos); }
+    .chk .ic.warn { background:#F5A623; }
+    .chk .tx { color:#45415C; line-height:1.5; }
+    .chk .tx b { color:var(--ink); }
+    .guide { margin-top:8px; background:#FFF6E9; border:1px solid #F6E4BE; border-radius:10px; padding:10px; font-size:11.5px; color:#7A5A12; line-height:1.6; display:none; }
+    .guide.show { display:block; }
+    .guide code { background:#fff; border:1px solid #EADFC2; border-radius:5px; padding:1px 5px; color:#8a5a00; }
+    .guide .g-btn { margin-top:8px; width:100%; height:34px; border:none; border-radius:8px; background:#C8930B; color:#fff; font-size:12.5px; font-weight:700; cursor:pointer; }
+    .copy { cursor:pointer; color:var(--b); text-decoration:underline; }
+    .sec-t { font-size:11px; font-weight:800; color:var(--bd); letter-spacing:.3px; margin-bottom:8px; }
+    .hint { font-size:10.5px; color:var(--sub); margin-top:8px; line-height:1.5; }
+    .hint code { background:#F4F2FA; border-radius:4px; padding:0 4px; color:#5A4BD0; }
+    #importFile { display:none; }
+    .toast { position: fixed; left:50%; bottom:10px; transform:translateX(-50%); background:#16131F; color:#fff; font-size:12px; padding:8px 14px; border-radius:8px; opacity:0; transition:.2s; pointer-events:none; max-width:90%; text-align:center; }
+    .toast.show { opacity:1; }
+  </style>
+</head>
+<body>
+  <div class="hd">
+    <h1>✎ PinSpec <span class="v">v1.2</span></h1>
+    <p>通用网页 / 原型标记器 · 选中元素写备注，导出反馈给 AI。</p>
+  </div>
+
+  <div class="sec">
+    <div class="row">
+      <label class="switch"><input type="checkbox" id="modeCb"><span class="tk"></span>标记模式</label>
+      <span class="kbd">快捷键 <b>Alt/⌥+Shift+M</b></span>
+    </div>
+    <div class="row" style="margin-top:10px;">
+      <label class="switch"><input type="checkbox" id="continuousCb"><span class="tk"></span>连续标记</label>
+    </div>
+    <div class="hint" style="margin-top:6px;">开启后，保存备注不会自动退出标记模式；默认关闭，保存后退出。</div>
+  </div>
+
+  <div class="sec">
+    <div class="stats">
+      <div class="stat"><b id="stTotal">0</b><span>全部备注</span></div>
+      <div class="stat"><b id="stPage">0</b><span>当前页面</span></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <button class="btn full primary" id="promptBtn" title="配合 pinspec-annotations skill 使用" style="margin-bottom:8px;">导出为 Prompt（复制给 AI）</button>
+    <div class="btns">
+      <button class="btn full" id="panelBtn">在页面打开备注面板</button>
+      <button class="btn" id="expJson">导出 JSON</button>
+      <button class="btn" id="expMd">导出 Markdown</button>
+      <button class="btn" id="impBtn">导入 JSON</button>
+      <button class="btn danger" id="clrBtn">清空全部</button>
+    </div>
+    <input type="file" id="importFile" accept="application/json">
+    <div class="hint">「导出为 Prompt」会复制 <b>AI 提示词 + 标记 JSON</b>，并指明用 <code>pinspec-annotations</code> skill 解析修复。</div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-t">环境自检</div>
+    <div id="checks"></div>
+    <div class="guide" id="guideFile">
+      <b>当前是 file:// 页面，扩展默认无法注入。</b><br>
+      请开启文件访问权限：
+      <div class="g-btn" id="openSettings">打开本扩展设置 → 开启「允许访问文件网址」</div>
+      或改用本地服务器打开（推荐）：<br>
+      <code id="serveCmd">python3 -m http.server 8000</code> <span class="copy" id="copyCmd">复制</span>
+    </div>
+    <div class="guide" id="guideDead">
+      <b>当前页面未检测到标记器。</b><br>
+      可能原因：页面是 <code>chrome://</code> / 应用商店等受限页，或刚装好扩展需<b>刷新页面</b>。请刷新后重试。
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="popup.js"></script>
+</body>
+</html>

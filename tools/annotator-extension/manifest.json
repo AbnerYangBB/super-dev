@@ -1,0 +1,44 @@
+{
+  "manifest_version": 3,
+  "name": "PinSpec",
+  "version": "1.2.0",
+  "description": "通用网页/原型标记器：选中元素添加备注，可视化标记，并导出 JSON / Markdown / AI Prompt 反馈。",
+  "permissions": ["storage", "tabs", "scripting"],
+  "host_permissions": ["<all_urls>", "file:///*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "PinSpec 标记器",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>", "file:///*"],
+      "all_frames": true,
+      "match_about_blank": true,
+      "run_at": "document_idle",
+      "js": ["content.js"],
+      "css": ["content.css"]
+    }
+  ],
+  "commands": {
+    "toggle-mode": {
+      "suggested_key": { "default": "Alt+Shift+M", "mac": "Alt+Shift+M" },
+      "description": "切换标记模式"
+    }
+  },
+  "web_accessible_resources": [
+    { "resources": ["content.css"], "matches": ["<all_urls>"] }
+  ]
+}

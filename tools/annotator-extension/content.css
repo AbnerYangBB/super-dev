@@ -1,0 +1,92 @@
+/* ============================================================
+ * PinSpec · 注入样式（全部 ps- 前缀，避免污染宿主页面）
+ * ============================================================ */
+
+/* 标记模式光标 */
+html.ps-active, html.ps-active * { cursor: crosshair !important; }
+
+/* 高亮状态（加在宿主页面真实元素上） */
+.ps-hover  { outline: 2px dashed #7257F5 !important; outline-offset: -2px !important; background: rgba(114,87,245,.08) !important; }
+.ps-picked { outline: 3px solid #7257F5 !important; outline-offset: -2px !important; background: rgba(114,87,245,.14) !important; }
+.ps-marked { outline: 2px solid #F2685F !important; outline-offset: -2px !important; }
+.ps-flash  { animation: ps-flash 1.2s ease; }
+@keyframes ps-flash { 0%,100%{ box-shadow:0 0 0 0 rgba(242,104,95,0);} 30%{ box-shadow:0 0 0 6px rgba(242,104,95,.45);} }
+
+/* 我们自己的 UI 根：重置继承，固定字体 */
+.ps-root, .ps-root * { box-sizing: border-box; font-family: -apple-system, "PingFang SC", "Segoe UI", sans-serif; }
+.ps-root { cursor: default !important; }
+html.ps-active .ps-root, html.ps-active .ps-root * { cursor: default !important; }
+
+/* 图钉层 */
+.ps-pins { position: absolute; top: 0; left: 0; width: 0; height: 0; z-index: 2147483640; }
+.ps-pin {
+  position: absolute; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px;
+  background: #F2685F; color: #fff; font-size: 11px; font-weight: 800; line-height: 18px; text-align: center;
+  box-shadow: 0 2px 6px rgba(242,104,95,.5); cursor: pointer; pointer-events: auto; z-index: 2147483641;
+}
+
+/* 备注浮层 */
+.ps-pop {
+  position: fixed; z-index: 2147483646; width: 300px; max-width: 92vw; background: #fff;
+  border-radius: 14px; border: 1px solid #ECE8F6; box-shadow: 0 18px 50px rgba(28,20,60,.32); overflow: hidden;
+}
+.ps-pop-h { padding: 12px 14px 0; font-size: 14px; font-weight: 800; color: #2C2840; }
+.ps-pop-meta { padding: 6px 14px 0; font-size: 11.5px; color: #6B6880; line-height: 1.55; }
+.ps-pop-remote { margin-bottom: 6px; padding: 6px 8px; border-radius: 8px; background: #F4F1FC; color: #5A4BD0; font-size: 11px; font-weight: 700; line-height: 1.45; }
+.ps-pop-meta code { background: #F4F2FA; padding: 1px 5px; border-radius: 5px; color: #5A4BD0; font-size: 11px; word-break: break-all; }
+.ps-pop-ta { display: block; width: calc(100% - 28px); margin: 10px 14px 0; min-height: 84px; padding: 9px; border: 1px solid #E0DCEC; border-radius: 10px; font-size: 13px; resize: vertical; color: #2C2840; }
+.ps-pop-ta:focus { outline: none; border-color: #7257F5; }
+.ps-pop-act { display: flex; gap: 8px; padding: 10px 14px 14px; }
+
+/* 按钮 */
+.ps-btn { flex: 1; height: 38px; border: none; border-radius: 10px; font-size: 13.5px; font-weight: 700; cursor: pointer; }
+.ps-btn.sm { height: 32px; font-size: 12px; flex: none; padding: 0 10px; }
+.ps-btn.primary { background: #7257F5; color: #fff; }
+.ps-btn.ghost { background: #F1EEF8; color: #5A5670; }
+.ps-btn.danger { background: #FDE7E4; color: #E0514A; }
+
+/* 悬浮按钮 */
+.ps-fab {
+  position: fixed; right: 18px; bottom: 18px; z-index: 2147483645; width: 52px; height: 52px; border-radius: 50%;
+  background: #7257F5; color: #fff; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 10px 26px rgba(114,87,245,.5); cursor: grab; user-select: none; touch-action: none;
+}
+.ps-fab.dragging { cursor: grabbing; box-shadow: 0 14px 32px rgba(114,87,245,.65); }
+.ps-fab.on { background: #F2685F; box-shadow: 0 10px 26px rgba(242,104,95,.55); }
+.ps-fab .ps-i { font-size: 22px; font-style: normal; }
+.ps-fab-badge { position: absolute; top: -3px; right: -3px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: #16131F; color: #fff; font-size: 11px; font-weight: 800; align-items: center; justify-content: center; display: flex; }
+
+/* 面板 */
+.ps-panel {
+  position: fixed; right: 0; top: 0; bottom: 0; width: 320px; z-index: 2147483644; background: #fff;
+  border-left: 1px solid #E6E2F0; box-shadow: -10px 0 30px rgba(20,16,40,.12); transform: translateX(100%);
+  transition: transform .25s ease; display: flex; flex-direction: column;
+}
+.ps-panel.open { transform: none; }
+.ps-p-h { display: flex; align-items: center; padding: 14px 16px; border-bottom: 1px solid #EFECF6; font-size: 15px; }
+.ps-p-h b { flex: 1; color: #2C2840; }
+.ps-p-close { cursor: pointer; color: #9A95AD; font-size: 20px; line-height: 1; }
+.ps-p-bar { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid #F2EFF8; }
+.ps-switch { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: #45415C; cursor: pointer; flex: 1; }
+.ps-switch input { display: none; }
+.ps-switch span { width: 38px; height: 22px; border-radius: 11px; background: #D8D2E8; position: relative; transition: background .2s; }
+.ps-switch span::after { content: ''; position: absolute; left: 2px; top: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+.ps-switch input:checked + span { background: #F2685F; }
+.ps-switch input:checked + span::after { transform: translateX(16px); }
+.ps-p-list { flex: 1; overflow: auto; padding: 12px 14px; }
+.ps-empty { text-align: center; color: #9A95AD; font-size: 12.5px; padding: 40px 10px; line-height: 1.7; }
+.ps-grp { margin-bottom: 14px; }
+.ps-grp-t { font-size: 11.5px; font-weight: 800; color: #5A4BD0; margin-bottom: 6px; word-break: break-all; }
+.ps-item { position: relative; background: #F8F6FD; border: 1px solid #EEE9F8; border-radius: 10px; padding: 9px 44px 9px 9px; margin-bottom: 8px; cursor: pointer; }
+.ps-item:hover { border-color: #7257F5; }
+.ps-edit { position: absolute; right: 26px; top: 6px; color: #C9C3D8; cursor: pointer; font-size: 13px; line-height: 1; }
+.ps-edit:hover { color: #7257F5; }
+.ps-del { position: absolute; right: 8px; top: 6px; color: #C9C3D8; cursor: pointer; font-size: 15px; line-height: 1; }
+.ps-del:hover { color: #F2685F; }
+.ps-t { font-size: 11.5px; color: #8A84A6; margin-top: 2px; word-break: break-all; }
+.ps-n { font-size: 13px; color: #2C2840; margin-top: 5px; font-weight: 600; line-height: 1.5; }
+.ps-p-foot { display: flex; gap: 6px; padding: 12px 14px; border-top: 1px solid #F2EFF8; }
+
+/* toast */
+.ps-toast { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); z-index: 2147483647; background: #16131F; color: #fff; font-size: 12.5px; padding: 9px 16px; border-radius: 10px; opacity: 0; transition: opacity .2s; pointer-events: none; max-width: 80vw; }
+.ps-toast.show { opacity: 1; }

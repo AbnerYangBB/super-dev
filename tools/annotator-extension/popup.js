@@ -1,13 +1,40 @@
 /* ============================================================
  * PinSpec · popup
- * 模式开关、统计、导出 Prompt/JSON/Markdown、导入、清空、环境自检与权限引导
+ * 设置：标记模式、连续标记、单一标记快捷键、环境自检
  * ============================================================ */
-var SKILL = 'pinspec-annotations';
-var K_MODE = 'ps_mode', K_ANNS = 'ps_anns', K_CONTINUOUS = 'ps_continuous';
+var K_MODE = 'ps_mode', K_CONTINUOUS = 'ps_continuous', K_SHORTCUT = 'ps_custom_shortcut', K_ALL_URLS = 'ps_all_urls';
 var activeTab = null;
+var recordingShortcut = false;
+var toastTimer = null;
+var currentShortcut = null;
+var allUrlsEnabled = false;
+var modeOn = false;
+var checkRunId = 0;
+
+var DEFAULT_SHORTCUT = {
+  code: 'KeyM',
+  key: 'M',
+  ctrlKey: false,
+  altKey: true,
+  shiftKey: true,
+  metaKey: false
+};
 
 function $(id){ return document.getElementById(id); }
-function toast(m){ var t=$('toast'); t.textContent=m; t.classList.add('show'); setTimeout(function(){ t.classList.remove('show'); }, 1800); }
+
+function toast(m){
+  var t = $('toast');
+  t.textContent = m;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 1800);
+}
+
+function storageObj(key, value){
+  var o = {};
+  o[key] = value;
+  return o;
+}
 
 /* 仅向顶层 frame 发消息，并吞掉 lastError，避免 popup 报 Unchecked runtime.lastError */
 function tabMsg(tabId, msg, cb){
@@ -18,115 +45,156 @@ function tabMsg(tabId, msg, cb){
 }
 
 /* ---- 初始化 ---- */
-chrome.storage.local.get([K_MODE, K_ANNS, K_CONTINUOUS], function(d){
-  $('modeCb').checked = !!d[K_MODE];
+chrome.storage.local.get([K_MODE, K_CONTINUOUS, K_SHORTCUT, K_ALL_URLS], function(d){
+  modeOn = !!d[K_MODE];
   $('continuousCb').checked = !!d[K_CONTINUOUS];
-  $('stTotal').textContent = (d[K_ANNS] || []).length;
+  allUrlsEnabled = !!d[K_ALL_URLS];
+  $('allUrlsCb').checked = allUrlsEnabled;
+  renderShortcut(d[K_SHORTCUT] || DEFAULT_SHORTCUT);
+  refreshModeStatus();
+  if (activeTab) runChecks();
 });
+
 chrome.tabs.query({ active:true, currentWindow:true }, function(tabs){
   activeTab = tabs[0];
+  refreshModeStatus();
   runChecks();
 });
 
-/* ---- 模式开关 ---- */
-$('modeCb').addEventListener('change', function(){
-  var o = {}; o[K_MODE] = this.checked; chrome.storage.local.set(o);
-  toast(this.checked ? '已开启标记模式' : '已关闭标记模式');
+chrome.storage.onChanged.addListener(function(changes, area){
+  if (area !== 'local') return;
+  if (changes[K_MODE]){ modeOn = !!changes[K_MODE].newValue; refreshModeStatus(); }
+  if (changes[K_CONTINUOUS]) $('continuousCb').checked = !!changes[K_CONTINUOUS].newValue;
+  if (changes[K_SHORTCUT]) renderShortcut(changes[K_SHORTCUT].newValue || DEFAULT_SHORTCUT);
+  if (changes[K_ALL_URLS]){
+    allUrlsEnabled = !!changes[K_ALL_URLS].newValue;
+    $('allUrlsCb').checked = allUrlsEnabled;
+    refreshModeStatus();
+    runChecks();
+  }
 });
 
+/* ---- 模式状态 ---- */
+function refreshModeStatus(){
+  updateModeStatus(!!modeOn && isCurrentPageAllowed());
+}
+
+function updateModeStatus(on){
+  var el = $('modeStatus');
+  el.textContent = on ? '开启' : '关闭';
+  el.classList.toggle('on', !!on);
+}
+
 $('continuousCb').addEventListener('change', function(){
-  var o = {}; o[K_CONTINUOUS] = this.checked; chrome.storage.local.set(o);
+  chrome.storage.local.set(storageObj(K_CONTINUOUS, this.checked));
   toast(this.checked ? '已开启连续标记' : '已关闭连续标记');
 });
 
-/* ---- 面板 / 导出 / 导入 / 清空 ---- */
-$('panelBtn').onclick = function(){
-  if (!activeTab) return;
-  ensureInjected(activeTab.id, function(resp){
-    if (!resp){ toast('当前页面未注入，见下方自检'); return; }
-    tabMsg(activeTab.id, { type:'ps-open-panel' }, function(){ window.close(); });
+$('allUrlsCb').addEventListener('change', function(){
+  allUrlsEnabled = this.checked;
+  chrome.storage.local.set(storageObj(K_ALL_URLS, this.checked), function(){
+    toast(allUrlsEnabled ? '已允许任何网址加载' : '已恢复仅本地加载');
+    runChecks();
   });
-};
-$('promptBtn').onclick = function(){ copyPrompt(); };
-$('expJson').onclick = function(){ exportData('json'); };
-$('expMd').onclick = function(){ exportData('md'); };
-$('impBtn').onclick = function(){ $('importFile').click(); };
-$('importFile').addEventListener('change', function(e){
-  var f = e.target.files[0]; if(!f) return;
-  var rd = new FileReader();
-  rd.onload = function(){
-    try {
-      var data = JSON.parse(rd.result);
-      var incoming = Array.isArray(data) ? data : (data.annotations || []);
-      chrome.storage.local.get([K_ANNS], function(d){
-        var cur = d[K_ANNS] || [];
-        var ids = {}; cur.forEach(function(a){ ids[a.id]=1; });
-        incoming.forEach(function(a){ if(a && a.id && !ids[a.id]) cur.push(a); });
-        var o={}; o[K_ANNS]=cur; chrome.storage.local.set(o, function(){ $('stTotal').textContent=cur.length; toast('已导入 '+incoming.length+' 条'); });
-      });
-    } catch(err){ toast('文件解析失败'); }
-  };
-  rd.readAsText(f);
 });
-$('clrBtn').onclick = function(){
-  if (!confirm('确定清空全部备注？')) return;
-  var o={}; o[K_ANNS]=[]; chrome.storage.local.set(o, function(){ $('stTotal').textContent='0'; $('stPage').textContent='0'; toast('已清空'); });
+
+function setMode(on){
+  chrome.storage.local.set(storageObj(K_MODE, !!on));
+  toast(on ? '已开启标记模式' : '已关闭标记模式');
+}
+
+/* ---- 单一标记快捷键 ---- */
+function prettyModifier(name){
+  if (name === 'meta') return '⌘';
+  if (name === 'alt') return '⌥';
+  if (name === 'ctrl') return '⌃';
+  return '⇧';
+}
+
+function prettyKey(ev){
+  if (/^Key[A-Z]$/.test(ev.code)) return ev.code.slice(3);
+  if (/^Digit[0-9]$/.test(ev.code)) return ev.code.slice(5);
+  var names = {
+    Space: 'Space',
+    Escape: 'Esc',
+    ArrowUp: 'ArrowUp',
+    ArrowDown: 'ArrowDown',
+    ArrowLeft: 'ArrowLeft',
+    ArrowRight: 'ArrowRight'
+  };
+  if (names[ev.code]) return names[ev.code];
+  return (ev.key || ev.code || '').length === 1 ? (ev.key || '').toUpperCase() : (ev.key || ev.code || '');
+}
+
+function formatShortcut(sc){
+  if (!sc) return '未设置';
+  var parts = [];
+  if (sc.ctrlKey) parts.push(prettyModifier('ctrl'));
+  if (sc.altKey) parts.push(prettyModifier('alt'));
+  if (sc.shiftKey) parts.push(prettyModifier('shift'));
+  if (sc.metaKey) parts.push(prettyModifier('meta'));
+  parts.push(sc.key || sc.code || '');
+  return parts.filter(Boolean).join(' + ');
+}
+
+function shortcutFromEvent(ev){
+  if (['Control', 'Shift', 'Alt', 'Meta'].indexOf(ev.key) !== -1) return null;
+  if (!(ev.ctrlKey || ev.altKey || ev.metaKey)) return null;
+  var key = prettyKey(ev);
+  return {
+    code: ev.code,
+    key: key,
+    ctrlKey: !!ev.ctrlKey,
+    altKey: !!ev.altKey,
+    shiftKey: !!ev.shiftKey,
+    metaKey: !!ev.metaKey
+  };
+}
+
+function renderShortcut(sc){
+  currentShortcut = sc || DEFAULT_SHORTCUT;
+  if (!recordingShortcut) $('recordShortcut').textContent = formatShortcut(currentShortcut);
+}
+
+function setRecordingShortcut(on){
+  recordingShortcut = !!on;
+  $('recordShortcut').classList.toggle('recording', recordingShortcut);
+  $('recordShortcut').textContent = recordingShortcut ? '按下快捷键' : formatShortcut(currentShortcut || DEFAULT_SHORTCUT);
+}
+
+$('recordShortcut').onclick = function(){
+  setRecordingShortcut(!recordingShortcut);
 };
 
-/* ---- 导出为 Prompt（复制到剪贴板） ---- */
-function buildPrompt(list){
-  var json = JSON.stringify({ tool:'PinSpec', skill:SKILL, total:list.length, annotations:list }, null, 2);
-  return [
-    '你是一名前端工程师，负责根据用户的可视化标记反馈修改网页 / 原型源码。',
-    '',
-    '下面是用户用 PinSpec 标记器导出的反馈数据（JSON）。请使用名为 `' + SKILL + '` 的 skill 来解析这份 JSON 并执行修复；',
-    '该 skill 说明了字段含义、元素定位规则（selector 优先、tag+target 文本兜底）、以及 url→源文件 的映射方法。',
-    '',
-    '执行要求：',
-    '1. 逐条处理 annotations：按 selector / tag / target / html 定位元素，依据 note 修改。',
-    '2. 通过 url / page 字段定位到对应的源文件再修改。',
-    '3. 改完后逐条回报：改了哪个文件、哪个元素、做了什么。',
-    '',
-    '```json',
-    json,
-    '```'
-  ].join('\n');
-}
-function copyPrompt(){
-  chrome.storage.local.get([K_ANNS], function(d){
-    var anns = d[K_ANNS] || [];
-    if (!anns.length){ toast('还没有备注'); return; }
-    var text = buildPrompt(anns);
-    navigator.clipboard.writeText(text).then(function(){ toast('Prompt 已复制，粘贴给 AI 即可'); }, function(){ toast('复制失败，请改用导出 JSON'); });
-  });
-}
+document.addEventListener('keydown', function(ev){
+  if (!recordingShortcut) return;
+  ev.preventDefault();
+  ev.stopPropagation();
 
-function exportData(kind){
-  chrome.storage.local.get([K_ANNS], function(d){
-    var anns = d[K_ANNS] || [];
-    if (!anns.length){ toast('还没有备注'); return; }
-    var name, text, type;
-    if (kind === 'json'){
-      name='annotations.json'; type='application/json';
-      text=JSON.stringify({ tool:'PinSpec', skill:SKILL, generatedAt:new Date().toISOString(), total:anns.length, annotations:anns }, null, 2);
-    } else {
-      name='annotations.md'; type='text/markdown';
-      var byPage={}; anns.forEach(function(a){ (byPage[a.page]=byPage[a.page]||[]).push(a); });
-      text='# 原型标记反馈\n\n';
-      Object.keys(byPage).forEach(function(pg){ text+='## '+pg+'\n\n'; byPage[pg].forEach(function(a){ text+='- `'+(a.selector||'')+'` '+(a.target?('“'+a.target+'”'):'')+'\n  - 备注：'+a.note+'\n'; }); text+='\n'; });
-    }
-    var blob=new Blob([text],{type:type}), url=URL.createObjectURL(blob);
-    var a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-    toast('已导出 '+name);
+  if (ev.key === 'Escape') {
+    setRecordingShortcut(false);
+    toast('已取消设置');
+    return;
+  }
+
+  var shortcut = shortcutFromEvent(ev);
+  if (!shortcut) {
+    toast('请按带 ⌃ / ⌥ / ⌘ 的组合键');
+    return;
+  }
+
+  chrome.storage.local.set(storageObj(K_SHORTCUT, shortcut), function(){
+    renderShortcut(shortcut);
+    setRecordingShortcut(false);
+    toast('已保存标记快捷键');
   });
-}
+}, true);
 
 /* ---- 确保 content script 已注入（失败则用 scripting 自动补注入，免刷新） ---- */
 function ensureInjected(tabId, cb){
   tabMsg(tabId, { type:'ps-ping' }, function(resp){
     if (resp){ cb(resp); return; }
     if (!chrome.scripting){ cb(null); return; }
-    // 当前页未注入：主动注入一次（file:// 需已开启文件访问，否则注入会被拒绝）
     chrome.scripting.insertCSS({ target:{ tabId:tabId, allFrames:true }, files:['content.css'] }).catch(function(){});
     chrome.scripting.executeScript({ target:{ tabId:tabId, allFrames:true }, files:['content.js'] }).then(function(){
       tabMsg(tabId, { type:'ps-ping' }, function(r2){ cb(r2 || null); });
@@ -135,42 +203,64 @@ function ensureInjected(tabId, cb){
 }
 
 /* ---- 环境自检 ---- */
-function addCheck(state, html){
-  var icon = state==='ok'?'✓':(state==='warn'?'!':'×');
-  var div=document.createElement('div'); div.className='chk';
-  div.innerHTML='<span class="ic '+state+'">'+icon+'</span><span class="tx">'+html+'</span>';
+function addCheck(state, html, runId){
+  if (runId !== checkRunId) return;
+  var icon = state === 'ok' ? '✓' : (state === 'warn' ? '!' : '×');
+  var div = document.createElement('div');
+  div.className = 'chk';
+  div.innerHTML = '<span class="ic '+state+'">'+icon+'</span><span class="tx">'+html+'</span>';
+  $('checks').innerHTML = '';
   $('checks').appendChild(div);
 }
+
 function runChecks(){
-  $('checks').innerHTML='';
-  $('guideFile').classList.remove('show');
-  $('guideDead').classList.remove('show');
+  var runId = ++checkRunId;
+  $('checks').innerHTML = '';
+
   var url = activeTab ? (activeTab.url || '') : '';
-  var isFile = url.indexOf('file://') === 0;
-  var isRestricted = /^(chrome|edge|about|chrome-extension|https:\/\/chrome\.google\.com\/webstore|https:\/\/chromewebstore\.google\.com)/.test(url);
 
-  if (isRestricted){ addCheck('no', '当前是浏览器受限页面，扩展无法在此运行。请切到目标网页。'); $('guideDead').classList.add('show'); return; }
-  if (!activeTab){ addCheck('no','未获取到当前标签页。'); return; }
+  if (isRestrictedUrl(url)){
+    addCheck('no', '浏览器页面受限', runId);
+    return;
+  }
+  if (!activeTab){
+    addCheck('no', '浏览器页面受限', runId);
+    return;
+  }
+  if (!isLocalUrl(url) && !allUrlsEnabled){
+    addCheck('no', '浏览器页面受限', runId);
+    return;
+  }
 
-  // 以「是否注入成功」为唯一权威结论；失败时自动尝试补注入
   ensureInjected(activeTab.id, function(resp){
-    if (resp){
-      addCheck('ok', '标记器已就绪，当前页面 <b>'+resp.page+'</b>。' + (isFile ? '（file:// 文件访问已开启）' : '（http/https）'));
-      $('stPage').textContent = resp.mine || 0;
-    } else if (isFile){
-      addCheck('no', '无法在此 <b>file://</b> 页面注入：请开启「允许访问文件网址」后<b>重新打开此弹窗</b>。');
-      $('guideFile').classList.add('show');
+    if (resp && resp.active !== false){
+      addCheck('ok', '标记器已就绪', runId);
     } else {
-      addCheck('no', '未能注入标记器：请<b>刷新页面</b>后重试（该页面可能限制脚本注入）。');
-      $('guideDead').classList.add('show');
+      addCheck('no', '浏览器页面受限', runId);
     }
   });
 }
 
-/* ---- 打开扩展设置页（引导开启文件访问） ---- */
-$('openSettings').onclick = function(){
-  chrome.tabs.create({ url: 'chrome://extensions/?id=' + chrome.runtime.id });
-};
-$('copyCmd').onclick = function(){
-  navigator.clipboard.writeText($('serveCmd').textContent).then(function(){ toast('命令已复制'); });
-};
+function isLocalUrl(url){
+  try {
+    var u = new URL(url || '');
+    var host = (u.hostname || '').toLowerCase();
+    return u.protocol === 'file:' ||
+      host === 'localhost' ||
+      host === '::1' ||
+      host === '[::1]' ||
+      host === '0.0.0.0' ||
+      /^127(?:\.\d{1,3}){0,3}$/.test(host);
+  } catch(e) {
+    return false;
+  }
+}
+
+function isRestrictedUrl(url){
+  return /^(chrome|edge|about|chrome-extension|https:\/\/chrome\.google\.com\/webstore|https:\/\/chromewebstore\.google\.com)/.test(url || '');
+}
+
+function isCurrentPageAllowed(){
+  var url = activeTab ? (activeTab.url || '') : '';
+  return !!activeTab && !isRestrictedUrl(url) && (allUrlsEnabled || isLocalUrl(url));
+}

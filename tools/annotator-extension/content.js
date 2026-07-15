@@ -15,7 +15,8 @@
   window.__pinspec_loaded = true;
 
   var SKILL = 'pinspec-annotations';
-  var K_MODE = 'ps_mode', K_ANNS = 'ps_anns', K_FOCUS = 'ps_focus', K_CONTINUOUS = 'ps_continuous', K_FAB_POS = 'ps_fab_pos';
+  var K_MODE = 'ps_mode', K_ANNS = 'ps_anns', K_FOCUS = 'ps_focus', K_CONTINUOUS = 'ps_continuous', K_FAB_POS = 'ps_fab_pos', K_SHORTCUT = 'ps_custom_shortcut', K_ALL_URLS = 'ps_all_urls';
+  var DEFAULT_SHORTCUT = { code:'KeyM', key:'M', ctrlKey:false, altKey:true, shiftKey:true, metaKey:false };
   var URLKEY = location.href.split('#')[0];
   var PAGE = (location.pathname.split('/').pop() || 'page').replace(/\.[a-z]+$/i, '') || 'page';
   var isTop = (window.top === window);
@@ -23,10 +24,91 @@
   var mode = false;
   var continuousMode = false;
   var fabPos = null;
+  var customShortcut = null;
+  var allUrlsEnabled = false;
+  var pageEnabled = isLocalUrl(location.href);
   var anns = [];
   var hoverEl = null, pickedEl = null;
   var pins = [];           // {ann, el, pinEl}
   var rafPending = false;
+  var extensionAlive = true;
+
+  function markExtensionInvalid(err){
+    if (err && /Extension context invalidated/i.test(String(err.message || err))) {
+      extensionAlive = false;
+      return true;
+    }
+    return false;
+  }
+
+  function hasExtensionContext(){
+    if (!extensionAlive) return false;
+    try {
+      return !!(window.chrome && chrome.runtime && chrome.runtime.id && chrome.storage && chrome.storage.local);
+    } catch(e) {
+      markExtensionInvalid(e);
+      return false;
+    }
+  }
+
+  function safeStorageGet(keys, cb){
+    if (!hasExtensionContext()) return;
+    try {
+      chrome.storage.local.get(keys, function(d){
+        try {
+          if (chrome.runtime.lastError) {
+            markExtensionInvalid(chrome.runtime.lastError);
+            return;
+          }
+        } catch(e) {
+          markExtensionInvalid(e);
+          return;
+        }
+        cb && cb(d || {});
+      });
+    } catch(e) {
+      if (!markExtensionInvalid(e)) throw e;
+    }
+  }
+
+  function safeStorageSet(data, cb){
+    if (!hasExtensionContext()) return;
+    try {
+      chrome.storage.local.set(data, function(){
+        try {
+          if (chrome.runtime.lastError) {
+            markExtensionInvalid(chrome.runtime.lastError);
+            return;
+          }
+        } catch(e) {
+          markExtensionInvalid(e);
+          return;
+        }
+        cb && cb();
+      });
+    } catch(e) {
+      if (!markExtensionInvalid(e)) throw e;
+    }
+  }
+
+  function isLocalUrl(url){
+    try {
+      var u = new URL(url || '');
+      var host = (u.hostname || '').toLowerCase();
+      return u.protocol === 'file:' ||
+        host === 'localhost' ||
+        host === '::1' ||
+        host === '[::1]' ||
+        host === '0.0.0.0' ||
+        /^127(?:\.\d{1,3}){0,3}$/.test(host);
+    } catch(e) {
+      return false;
+    }
+  }
+
+  function computePageEnabled(){
+    return !!allUrlsEnabled || isLocalUrl(location.href);
+  }
 
   /* ---------------- 选择器工具 ---------------- */
   function cssEsc(s){ return (window.CSS && CSS.escape) ? CSS.escape(s) : String(s).replace(/([^\w-])/g, '\\$1'); }
@@ -64,17 +146,54 @@
 
   /* ---------------- 存储 ---------------- */
   function loadAll(cb){
-    chrome.storage.local.get([K_MODE, K_ANNS, K_CONTINUOUS, K_FAB_POS], function(d){
+    safeStorageGet([K_MODE, K_ANNS, K_CONTINUOUS, K_FAB_POS, K_SHORTCUT, K_ALL_URLS], function(d){
       mode = !!d[K_MODE];
       continuousMode = !!d[K_CONTINUOUS];
       fabPos = d[K_FAB_POS] || null;
+      customShortcut = normalizeShortcut(d[K_SHORTCUT]);
+      allUrlsEnabled = !!d[K_ALL_URLS];
+      pageEnabled = computePageEnabled();
       anns = d[K_ANNS] || [];
       cb && cb();
     });
   }
-  function persistAnns(){ var o = {}; o[K_ANNS] = anns; chrome.storage.local.set(o); }
-  function setModeStore(on){ var o = {}; o[K_MODE] = !!on; chrome.storage.local.set(o); }
+  function persistAnns(){ var o = {}; o[K_ANNS] = anns; safeStorageSet(o); }
+  function setModeStore(on){ var o = {}; o[K_MODE] = !!on; safeStorageSet(o); }
   function myAnns(){ return anns.filter(function(a){ return a.url === URLKEY; }); }
+
+  /* ---------------- 页面内自定义快捷键 ---------------- */
+  function normalizeShortcut(sc){
+    if (!sc || !sc.code) sc = DEFAULT_SHORTCUT;
+    return {
+      code: sc.code,
+      key: sc.key || '',
+      label: sc.label || '',
+      ctrlKey: !!sc.ctrlKey,
+      altKey: !!sc.altKey,
+      shiftKey: !!sc.shiftKey,
+      metaKey: !!sc.metaKey
+    };
+  }
+  function isEditableTarget(el){
+    if (!el) return false;
+    var tag = (el.tagName || '').toLowerCase();
+    return tag === 'input' || tag === 'textarea' || tag === 'select' || !!el.isContentEditable;
+  }
+  function matchesShortcut(ev, sc){
+    if (!sc) return false;
+    return ev.code === sc.code &&
+      !!ev.ctrlKey === sc.ctrlKey &&
+      !!ev.altKey === sc.altKey &&
+      !!ev.shiftKey === sc.shiftKey &&
+      !!ev.metaKey === sc.metaKey;
+  }
+  function onKeyDown(ev){
+    if (!pageEnabled || ev.repeat || !customShortcut || isEditableTarget(ev.target)) return;
+    if (!matchesShortcut(ev, customShortcut)) return;
+    ev.preventDefault();
+    ev.stopPropagation();
+    setModeStore(!mode);
+  }
 
   /* ---------------- 跨页定位（通用，不依赖特定站点结构） ---------------- */
   function normUrl(u){ return (u || '').split('#')[0]; }
@@ -138,7 +257,7 @@
   }
 
   function applyPendingFocus(){
-    chrome.storage.local.get([K_FOCUS], function(d){
+    safeStorageGet([K_FOCUS], function(d){
       var f = d[K_FOCUS];
       if (!f || !sameUrl(f.url, URLKEY)) return;
       var a = anns.filter(function(x){ return x.id === f.id; })[0];
@@ -150,19 +269,19 @@
   function requestFocus(a){
     if (!a) return;
     var o = {}; o[K_FOCUS] = { url: a.url, id: a.id, ts: Date.now() };
-    chrome.storage.local.set(o);
+    safeStorageSet(o);
     if (!sameUrl(a.url, URLKEY) && isTop) tryNavigateToAnn(a);
     else if (sameUrl(a.url, URLKEY)) focusAnn(a);
   }
 
   /* ---------------- 悬停高亮 ---------------- */
-  function onOver(e){ if(!mode) return; if(isOurs(e.target)) return; if(hoverEl) hoverEl.classList.remove('ps-hover'); hoverEl = e.target; hoverEl.classList.add('ps-hover'); }
-  function onOut(e){ if(!mode) return; if(e.target && e.target.classList) e.target.classList.remove('ps-hover'); }
+  function onOver(e){ if(!pageEnabled || !mode) return; if(isOurs(e.target)) return; if(hoverEl) hoverEl.classList.remove('ps-hover'); hoverEl = e.target; hoverEl.classList.add('ps-hover'); }
+  function onOut(e){ if(!pageEnabled || !mode) return; if(e.target && e.target.classList) e.target.classList.remove('ps-hover'); }
   function isOurs(el){ return !!(el && el.closest && el.closest('.ps-root')); }
 
   /* ---------------- 点击选中 ---------------- */
   function onClick(e){
-    if (!mode) return;
+    if (!pageEnabled || !mode) return;
     if (isOurs(e.target)) return;          // 点到我们自己的 UI 不拦截
     e.preventDefault(); e.stopPropagation();
     clearPicked();
@@ -239,6 +358,12 @@
     return pinLayer;
   }
   function renderMarkers(){
+    if (!pageEnabled){
+      Array.prototype.slice.call(document.querySelectorAll('.ps-marked')).forEach(function(n){ n.classList.remove('ps-marked'); });
+      if (pinLayer) pinLayer.innerHTML = '';
+      pins = [];
+      return;
+    }
     Array.prototype.slice.call(document.querySelectorAll('.ps-marked')).forEach(function(n){ n.classList.remove('ps-marked'); });
     ensureLayer().innerHTML = ''; pins = [];
     myAnns().forEach(function(a, i){
@@ -290,7 +415,7 @@
   }
   function persistFabPos(pos){
     fabPos = pos;
-    var o = {}; o[K_FAB_POS] = pos; chrome.storage.local.set(o);
+    var o = {}; o[K_FAB_POS] = pos; safeStorageSet(o);
   }
   function bindFabDrag(){
     var dragging = false, moved = false, startX = 0, startY = 0, originX = 0, originY = 0;
@@ -329,7 +454,7 @@
   }
   function buildFab(){
     fab = document.createElement('div'); fab.className = 'ps-root ps-fab';
-    fab.innerHTML = '<i class="ps-i">✎</i><span class="ps-fab-badge" style="display:none">0</span>';
+    fab.innerHTML = '<i class="ps-i" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M15.6 4.8l3.6 3.6M4.75 19.25l4.05-.86 9.55-9.55a2.55 2.55 0 0 0-3.6-3.6L5.2 14.79l-.45 4.46Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></i><span class="ps-fab-badge">0</span>';
     fab.title = 'PinSpec 标记（拖动可移动，点击打开面板）';
     document.documentElement.appendChild(fab);
     applyFabPos();
@@ -338,16 +463,16 @@
   function buildPanel(){
     panel = document.createElement('div'); panel.className = 'ps-root ps-panel';
     panel.innerHTML =
-      '<div class="ps-p-h"><b>PinSpec 标记</b><span class="ps-p-close">×</span></div>' +
+      '<div class="ps-p-h"><div class="ps-p-title"><b>页面标注</b><span>查看、定位、编辑当前标记反馈</span></div><span class="ps-p-count">0 条</span><button class="ps-p-close" title="关闭">关闭</button></div>' +
       '<div class="ps-p-bar">' +
         '<label class="ps-switch"><input type="checkbox" class="ps-mode-cb"><span></span>标记模式</label>' +
       '</div>' +
       '<div class="ps-p-list"></div>' +
       '<div class="ps-p-foot">' +
         '<button class="ps-btn primary sm ps-exp-prompt" title="配合 ' + SKILL + ' skill 使用">导出为 Prompt</button>' +
-        '<button class="ps-btn ghost sm ps-exp">JSON</button>' +
-        '<button class="ps-btn ghost sm ps-exp-md">MD</button>' +
         '<button class="ps-btn ghost sm danger ps-clr">清空</button>' +
+        '<button class="ps-btn ghost sm ps-exp">导出JSON</button>' +
+        '<button class="ps-btn ghost sm ps-exp-md">导出MD</button>' +
       '</div>';
     document.documentElement.appendChild(panel);
     panel.querySelector('.ps-p-close').onclick = function(){ panel.classList.remove('open'); };
@@ -361,18 +486,18 @@
   function renderPanel(){
     if (!isTop || !panel) return;
     panel.querySelector('.ps-mode-cb').checked = mode;
+    panel.querySelector('.ps-p-count').textContent = anns.length + ' 条';
     var list = panel.querySelector('.ps-p-list');
-    if (!anns.length){ list.innerHTML = '<div class="ps-empty">还没有备注。<br>开「标记模式」后点击页面元素即可添加。</div>'; return; }
+    if (!anns.length){ list.innerHTML = '<div class="ps-empty"><b>还没有标注</b><br>开启标记模式后，点击页面元素即可添加备注。</div>'; return; }
     var byPage = {}; anns.forEach(function(a){ (byPage[a.page]=byPage[a.page]||[]).push(a); });
     var html = '';
     Object.keys(byPage).forEach(function(pg){
       html += '<div class="ps-grp"><div class="ps-grp-t">'+esc(pg)+' · '+byPage[pg].length+'</div>';
       byPage[pg].forEach(function(a){
         html += '<div class="ps-item" data-id="'+a.id+'" data-url="'+esc(a.url)+'">'+
-          '<span class="ps-edit" data-id="'+a.id+'" title="编辑">✎</span>'+
-          '<span class="ps-del" data-id="'+a.id+'" title="删除">×</span>'+
           (a.tag ? '<div class="ps-t">&lt;'+esc(a.tag)+'&gt; '+(a.target?esc(a.target):'')+'</div>' : '')+
-          '<div class="ps-n">'+esc(a.note)+'</div></div>';
+          '<div class="ps-n">'+esc(a.note)+'</div>'+
+          '<div class="ps-item-actions"><button class="ps-edit" data-id="'+a.id+'" title="编辑">编辑</button><button class="ps-del" data-id="'+a.id+'" title="删除">删除</button></div></div>';
       });
       html += '</div>';
     });
@@ -416,6 +541,38 @@
     var b=fab.querySelector('.ps-fab-badge'); b.textContent=anns.length; b.style.display=anns.length?'flex':'none';
     fab.classList.toggle('on', mode);
     fab.style.display = 'flex';
+  }
+
+  function ensurePageUi(){
+    if (!isTop || !pageEnabled) return;
+    if (!fab) buildFab();
+    if (!panel) buildPanel();
+    renderPanel();
+    refreshFab();
+  }
+
+  function removePageUi(){
+    if (fab){ fab.remove(); fab = null; }
+    if (panel){ panel.remove(); panel = null; }
+    if (pinLayer){ pinLayer.innerHTML = ''; }
+    Array.prototype.slice.call(document.querySelectorAll('.ps-marked')).forEach(function(n){ n.classList.remove('ps-marked'); });
+    pins = [];
+    closePopover();
+    clearPicked();
+    if (hoverEl){ hoverEl.classList.remove('ps-hover'); hoverEl = null; }
+    document.documentElement.classList.remove('ps-active');
+  }
+
+  function syncPageEnabled(){
+    pageEnabled = computePageEnabled();
+    if (pageEnabled){
+      applyMode();
+      renderMarkers();
+      ensurePageUi();
+      applyPendingFocus();
+    } else {
+      removePageUi();
+    }
   }
 
   /* ---------------- 导出 ---------------- */
@@ -477,7 +634,7 @@
 
   /* ---------------- 模式应用 ---------------- */
   function applyMode(){
-    document.documentElement.classList.toggle('ps-active', mode);
+    document.documentElement.classList.toggle('ps-active', pageEnabled && mode);
     if (!mode){ if(hoverEl){ hoverEl.classList.remove('ps-hover'); hoverEl=null; } clearPicked(); closePopover(); }
     refreshFab();
   }
@@ -488,6 +645,7 @@
   document.addEventListener('mouseover', onOver, true);
   document.addEventListener('mouseout', onOut, true);
   document.addEventListener('click', onClick, true);
+  document.addEventListener('keydown', onKeyDown, true);
   window.addEventListener('scroll', scheduleUpdate, true);
   window.addEventListener('resize', function(){
     scheduleUpdate();
@@ -500,11 +658,13 @@
   var mo = new MutationObserver(function(){ scheduleUpdate(); });
 
   /* ---------------- storage 同步 ---------------- */
-  chrome.storage.onChanged.addListener(function(changes, area){
+  function handleStorageChange(changes, area){
     if (area !== 'local') return;
-    if (changes[K_MODE]){ mode = !!changes[K_MODE].newValue; applyMode(); }
+    if (changes[K_MODE]){ mode = !!changes[K_MODE].newValue; applyMode(); if(isTop && panel) renderPanel(); }
     if (changes[K_CONTINUOUS]){ continuousMode = !!changes[K_CONTINUOUS].newValue; }
     if (changes[K_FAB_POS]){ fabPos = changes[K_FAB_POS].newValue || null; if(isTop) applyFabPos(); }
+    if (changes[K_SHORTCUT]){ customShortcut = normalizeShortcut(changes[K_SHORTCUT].newValue); }
+    if (changes[K_ALL_URLS]){ allUrlsEnabled = !!changes[K_ALL_URLS].newValue; syncPageEnabled(); }
     if (changes[K_ANNS]){ anns = changes[K_ANNS].newValue || []; renderMarkers(); if(isTop){ renderPanel(); refreshFab(); } }
     if (changes[K_FOCUS] && changes[K_FOCUS].newValue){
       var f = changes[K_FOCUS].newValue;
@@ -513,18 +673,24 @@
       if (sameUrl(f.url, URLKEY)) focusAnn(a);
       else if (isTop) tryNavigateToAnn(a);
     }
-  });
+  }
+
+  try {
+    if (hasExtensionContext() && chrome.storage.onChanged) chrome.storage.onChanged.addListener(handleStorageChange);
+  } catch(e) {
+    if (!markExtensionInvalid(e)) throw e;
+  }
 
   /* ---------------- 来自 popup / background 的消息 ---------------- */
-  chrome.runtime.onMessage.addListener(function(msg, sender, reply){
+  function handleRuntimeMessage(msg, sender, reply){
     if (!msg || !msg.type) return;
     if (msg.type === 'ps-ping'){
-      reply({ ok:true, isTop:isTop, page:PAGE, url:URLKEY, total:anns.length, mine:myAnns().length, mode:mode });
+      reply({ ok:true, active:pageEnabled, isTop:isTop, page:PAGE, url:URLKEY, total:anns.length, mine:myAnns().length, mode:mode });
       return true;
     }
     if (msg.type === 'ps-open-panel'){
-      if (isTop && panel){ panel.classList.add('open'); renderPanel(); }
-      reply({ ok: !!isTop });
+      if (isTop && pageEnabled){ ensurePageUi(); panel.classList.add('open'); renderPanel(); }
+      reply({ ok: !!isTop && pageEnabled });
       return true;
     }
     if (msg.type === 'ps-export-json'){
@@ -532,14 +698,17 @@
       reply({ ok: true });
       return true;
     }
-  });
+  }
+
+  try {
+    if (hasExtensionContext() && chrome.runtime.onMessage) chrome.runtime.onMessage.addListener(handleRuntimeMessage);
+  } catch(e) {
+    if (!markExtensionInvalid(e)) throw e;
+  }
 
   /* ---------------- 启动 ---------------- */
   loadAll(function(){
-    applyMode();
-    renderMarkers();
-    applyPendingFocus();
     try { mo.observe(document.documentElement, {childList:true, subtree:true}); } catch(e){}
-    if (isTop){ buildFab(); buildPanel(); renderPanel(); refreshFab(); }
+    syncPageEnabled();
   });
 })();

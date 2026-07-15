@@ -2,108 +2,525 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    :root { --b:#7257F5; --bd:#5A4BD0; --sos:#F2685F; --ink:#2C2840; --sub:#6B6880; }
+    :root {
+      --primary: #8B5CF6;
+      --primary-strong: #7C3AED;
+      --primary-soft: #EDE9FE;
+      --accent: #A78BFA;
+      --success: #7DD3C7;
+      --danger: #DC2626;
+      --bg: #FCF7FF;
+      --surface: #FFFFFF;
+      --surface-soft: #FAF5FF;
+      --ink: #312E81;
+      --text: #2F2A3D;
+      --sub: #7B708F;
+      --border: #E9D5FF;
+      --ring: rgba(139, 92, 246, .3);
+      --shadow: 0 18px 45px rgba(124, 58, 237, .14);
+    }
+
     * { box-sizing: border-box; }
-    body { width: 330px; margin: 0; font-family: -apple-system, "PingFang SC", "Segoe UI", sans-serif; color: var(--ink); background: #fff; }
-    .hd { padding: 14px 16px; background: linear-gradient(135deg,#7257F5,#9B6BFF); color:#fff; }
-    .hd h1 { margin: 0; font-size: 15px; font-weight: 800; display:flex; align-items:center; gap:8px; }
-    .hd .v { font-size:10px; font-weight:700; background:rgba(255,255,255,.22); padding:1px 6px; border-radius:6px; }
-    .hd p { margin: 6px 0 0; font-size: 11.5px; opacity: .9; }
-    .sec { padding: 12px 16px; border-bottom: 1px solid #F0EDF7; }
-    .row { display: flex; align-items: center; gap: 10px; }
-    .switch { display:flex; align-items:center; gap:10px; font-size:14px; font-weight:700; cursor:pointer; flex:1; }
-    .switch input { display:none; }
-    .switch .tk { width:44px; height:26px; border-radius:13px; background:#D8D2E8; position:relative; transition:.2s; }
-    .switch .tk::after { content:''; position:absolute; left:3px; top:3px; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.25); transition:.2s; }
-    .switch input:checked + .tk { background: var(--sos); }
+
+    body {
+      width: 340px;
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 12% 0%, rgba(221, 214, 254, .84), transparent 34%),
+        linear-gradient(180deg, #FCF7FF 0%, #FFFFFF 70%);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible + .tk {
+      outline: 3px solid var(--ring);
+      outline-offset: 2px;
+    }
+
+    .app { padding: 12px; }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 12px 14px;
+      border: 1px solid rgba(233, 213, 255, .9);
+      border-radius: 20px;
+      background: linear-gradient(135deg, #A78BFA 0%, #C4B5FD 54%, #F0ABFC 100%);
+      color: #FFFFFF;
+      box-shadow: var(--shadow);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -42px;
+      top: -48px;
+      width: 126px;
+      height: 126px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .28);
+    }
+
+    .brand {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, .22);
+      border: 1px solid rgba(255, 255, 255, .42);
+    }
+
+    .brand-mark img {
+      width: 26px;
+      height: 26px;
+      display: block;
+      border-radius: 9px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.1;
+      font-weight: 850;
+      letter-spacing: -.02em;
+    }
+
+    .version {
+      display: inline-flex;
+      align-items: center;
+      height: 20px;
+      margin-top: 3px;
+      padding: 0 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .22);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .hero p {
+      position: relative;
+      z-index: 1;
+      margin: 8px 0 0;
+      max-width: 260px;
+      color: rgba(255, 255, 255, .92);
+      font-size: 12.5px;
+    }
+
+    .card {
+      margin-top: 8px;
+      padding: 10px;
+      border: 1px solid rgba(233, 213, 255, .92);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, .94);
+      box-shadow: 0 10px 28px rgba(124, 58, 237, .08);
+    }
+
+    .card-head {
+      margin-bottom: 8px;
+    }
+
+    .sec-t {
+      margin: 0;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 850;
+      letter-spacing: .04em;
+    }
+
+    .sec-sub {
+      margin: 2px 0 0;
+      color: var(--sub);
+      font-size: 11.5px;
+    }
+
+    .stack { display: grid; gap: 8px; }
+
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      min-height: 44px;
+      padding: 8px 10px;
+      border: 1px solid #F0E7FF;
+      border-radius: 14px;
+      background: var(--surface-soft);
+    }
+
+    .setting-copy b {
+      display: block;
+      color: var(--ink);
+      font-size: 13px;
+      line-height: 1.2;
+    }
+
+    .setting-copy span {
+      display: block;
+      margin-top: 2px;
+      color: var(--sub);
+      font-size: 11px;
+    }
+
+    .mode-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 28px;
+      padding: 3px 9px;
+      border: 1px solid #FCA5A5;
+      border-radius: 999px;
+      color: #B91C1C;
+      background: #FEF2F2;
+      font-size: 12px;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .mode-status::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: currentColor;
+    }
+
+    .mode-status.on {
+      border-color: #99F6E4;
+      color: #047857;
+      background: #ECFDF5;
+    }
+
+    .switch {
+      position: relative;
+      display: flex;
+      align-items: center;
+      min-width: 52px;
+      min-height: 40px;
+      cursor: pointer;
+    }
+
+    .switch input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+    }
+
+    .tk {
+      position: relative;
+      width: 46px;
+      height: 28px;
+      border-radius: 999px;
+      background: #DDD6FE;
+      transition: background .2s ease;
+    }
+
+    .tk::after {
+      content: "";
+      position: absolute;
+      left: 3px;
+      top: 3px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      box-shadow: 0 4px 12px rgba(49, 46, 129, .18);
+      transition: transform .2s ease;
+    }
+
+    .switch input:checked + .tk {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+    }
+
     .switch input:checked + .tk::after { transform: translateX(18px); }
-    .kbd { font-size: 11px; color: var(--sub); }
-    .kbd b { background:#F1EEF8; border:1px solid #E2DCF0; border-radius:5px; padding:1px 5px; color:#5A5670; }
-    .stats { display:flex; gap:10px; }
-    .stat { flex:1; background:#F7F5FC; border-radius:10px; padding:10px; text-align:center; }
-    .stat b { display:block; font-size:20px; font-weight:800; color:var(--bd); }
-    .stat span { font-size:11px; color:var(--sub); }
-    .btns { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-    .btn { height:38px; border:1px solid #E2DCF0; background:#fff; border-radius:10px; font-size:13px; font-weight:700; color:#45415C; cursor:pointer; }
-    .btn:hover { border-color:#C9C0EA; }
-    .btn.full { grid-column: span 2; }
-    .btn.primary { background:var(--b); border-color:var(--b); color:#fff; }
-    .btn.danger { color:var(--sos); }
-    .chk { display:flex; align-items:flex-start; gap:8px; font-size:12px; padding:6px 0; }
-    .chk .ic { width:18px; height:18px; border-radius:50%; flex:0 0 auto; display:flex; align-items:center; justify-content:center; font-size:11px; color:#fff; margin-top:1px; }
-    .chk .ic.ok { background:#2DC8A8; }
-    .chk .ic.no { background:var(--sos); }
-    .chk .ic.warn { background:#F5A623; }
-    .chk .tx { color:#45415C; line-height:1.5; }
-    .chk .tx b { color:var(--ink); }
-    .guide { margin-top:8px; background:#FFF6E9; border:1px solid #F6E4BE; border-radius:10px; padding:10px; font-size:11.5px; color:#7A5A12; line-height:1.6; display:none; }
-    .guide.show { display:block; }
-    .guide code { background:#fff; border:1px solid #EADFC2; border-radius:5px; padding:1px 5px; color:#8a5a00; }
-    .guide .g-btn { margin-top:8px; width:100%; height:34px; border:none; border-radius:8px; background:#C8930B; color:#fff; font-size:12.5px; font-weight:700; cursor:pointer; }
-    .copy { cursor:pointer; color:var(--b); text-decoration:underline; }
-    .sec-t { font-size:11px; font-weight:800; color:var(--bd); letter-spacing:.3px; margin-bottom:8px; }
-    .hint { font-size:10.5px; color:var(--sub); margin-top:8px; line-height:1.5; }
-    .hint code { background:#F4F2FA; border-radius:4px; padding:0 4px; color:#5A4BD0; }
-    #importFile { display:none; }
-    .toast { position: fixed; left:50%; bottom:10px; transform:translateX(-50%); background:#16131F; color:#fff; font-size:12px; padding:8px 14px; border-radius:8px; opacity:0; transition:.2s; pointer-events:none; max-width:90%; text-align:center; }
-    .toast.show { opacity:1; }
+
+    .shortcut-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 32px;
+      width: auto;
+      flex: 0 0 auto;
+      padding: 4px 10px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--primary-strong);
+      background: #FFFFFF;
+      font-size: 12px;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .btn {
+      min-height: 40px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      color: var(--ink);
+      background: #FFFFFF;
+      font-size: 12.5px;
+      font-weight: 850;
+      transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+
+    .btn:hover {
+      border-color: var(--primary);
+      box-shadow: 0 8px 18px rgba(124, 58, 237, .1);
+    }
+
+    .btn:active { transform: translateY(1px); }
+
+    .btn.primary {
+      border-color: var(--primary);
+      color: #FFFFFF;
+      background: linear-gradient(135deg, var(--primary-strong), var(--primary));
+    }
+
+    .shortcut-btn.recording {
+      border-color: #F0ABFC;
+      color: #581C87;
+      background: #FAE8FF;
+    }
+
+    .hint {
+      margin: 8px 0 0;
+      color: var(--sub);
+      font-size: 11.5px;
+      line-height: 1.55;
+    }
+
+    .checks { display: grid; gap: 8px; }
+
+    .chk {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      padding: 9px 10px;
+      border: 1px solid #F0E7FF;
+      border-radius: 14px;
+      background: var(--surface-soft);
+      font-size: 12px;
+    }
+
+    .chk .ic {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #FFFFFF;
+      font-size: 10px;
+      font-weight: 900;
+      margin-top: 1px;
+    }
+
+    .chk .ic.ok { background: var(--success); }
+    .chk .ic.no { background: var(--danger); }
+    .chk .ic.warn { background: #D97706; }
+    .chk .tx { color: var(--text); line-height: 1.5; }
+    .chk .tx b { color: var(--ink); }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 12px;
+      transform: translateX(-50%);
+      max-width: calc(100% - 28px);
+      padding: 9px 14px;
+      border-radius: 999px;
+      background: #1F1B2E;
+      color: #FFFFFF;
+      font-size: 12px;
+      font-weight: 750;
+      text-align: center;
+      opacity: 0;
+      transition: opacity .2s ease, transform .2s ease;
+      pointer-events: none;
+      box-shadow: 0 12px 30px rgba(31, 27, 46, .22);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(-2px);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --primary: #A78BFA;
+        --primary-strong: #C4B5FD;
+        --primary-soft: #2E244A;
+        --accent: #F0ABFC;
+        --success: #5EEAD4;
+        --danger: #F87171;
+        --bg: #14111F;
+        --surface: #1F1B2E;
+        --surface-soft: #2A2438;
+        --ink: #F5F3FF;
+        --text: #EDE9FE;
+        --sub: #C4B5D8;
+        --border: #4C3B6B;
+        --ring: rgba(196, 181, 253, .36);
+        --shadow: 0 18px 45px rgba(0, 0, 0, .34);
+      }
+
+      body {
+        background:
+          radial-gradient(circle at 12% 0%, rgba(76, 59, 107, .72), transparent 36%),
+          linear-gradient(180deg, #14111F 0%, #1B1728 70%);
+      }
+
+      .hero {
+        border-color: rgba(196, 181, 253, .34);
+        background: linear-gradient(135deg, #5B45A3 0%, #7C5FD1 58%, #9D5FB8 100%);
+      }
+
+      .brand-mark,
+      .version {
+        background: rgba(255, 255, 255, .14);
+        border-color: rgba(255, 255, 255, .22);
+      }
+
+      .card {
+        border-color: rgba(76, 59, 107, .86);
+        background: rgba(31, 27, 46, .94);
+        box-shadow: 0 10px 28px rgba(0, 0, 0, .2);
+      }
+
+      .setting-row,
+      .chk {
+        border-color: var(--border);
+        background: var(--surface-soft);
+      }
+
+      .mode-status {
+        border-color: rgba(248, 113, 113, .42);
+        color: #FCA5A5;
+        background: rgba(127, 29, 29, .28);
+      }
+
+      .mode-status.on {
+        border-color: rgba(94, 234, 212, .42);
+        color: #99F6E4;
+        background: rgba(20, 83, 75, .32);
+      }
+
+      .tk {
+        background: #4C3B6B;
+      }
+
+      .tk::after,
+      .shortcut-btn,
+      .btn {
+        background: #1F1B2E;
+        color: var(--primary-strong);
+      }
+
+      .shortcut-btn.recording {
+        border-color: rgba(240, 171, 252, .55);
+        color: #F5D0FE;
+        background: rgba(88, 28, 135, .36);
+      }
+
+      .toast {
+        background: #F5F3FF;
+        color: #1F1B2E;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="hd">
-    <h1>✎ PinSpec <span class="v">v1.2</span></h1>
-    <p>通用网页 / 原型标记器 · 选中元素写备注，导出反馈给 AI。</p>
-  </div>
+  <main class="app">
+    <section class="hero" aria-labelledby="appTitle">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <img src="icons/icon-128.png" alt="">
+        </span>
+        <div>
+          <h1 id="appTitle">PinSpec</h1>
+          <span class="version">v1.2.9</span>
+        </div>
+      </div>
+      <p>为网页元素添加可视化备注。具体标注内容在页面右侧面板管理。</p>
+    </section>
 
-  <div class="sec">
-    <div class="row">
-      <label class="switch"><input type="checkbox" id="modeCb"><span class="tk"></span>标记模式</label>
-      <span class="kbd">快捷键 <b>Alt/⌥+Shift+M</b></span>
-    </div>
-    <div class="row" style="margin-top:10px;">
-      <label class="switch"><input type="checkbox" id="continuousCb"><span class="tk"></span>连续标记</label>
-    </div>
-    <div class="hint" style="margin-top:6px;">开启后，保存备注不会自动退出标记模式；默认关闭，保存后退出。</div>
-  </div>
+    <section class="card" aria-labelledby="settingsTitle">
+      <div class="card-head">
+        <h2 class="sec-t" id="settingsTitle">设置</h2>
+      </div>
 
-  <div class="sec">
-    <div class="stats">
-      <div class="stat"><b id="stTotal">0</b><span>全部备注</span></div>
-      <div class="stat"><b id="stPage">0</b><span>当前页面</span></div>
-    </div>
-  </div>
+      <div class="stack">
+        <div class="setting-row">
+          <div class="setting-copy">
+            <b>当前标记状态</b>
+          </div>
+          <span class="mode-status" id="modeStatus" aria-live="polite">关闭</span>
+        </div>
 
-  <div class="sec">
-    <button class="btn full primary" id="promptBtn" title="配合 pinspec-annotations skill 使用" style="margin-bottom:8px;">导出为 Prompt（复制给 AI）</button>
-    <div class="btns">
-      <button class="btn full" id="panelBtn">在页面打开备注面板</button>
-      <button class="btn" id="expJson">导出 JSON</button>
-      <button class="btn" id="expMd">导出 Markdown</button>
-      <button class="btn" id="impBtn">导入 JSON</button>
-      <button class="btn danger" id="clrBtn">清空全部</button>
-    </div>
-    <input type="file" id="importFile" accept="application/json">
-    <div class="hint">「导出为 Prompt」会复制 <b>AI 提示词 + 标记 JSON</b>，并指明用 <code>pinspec-annotations</code> skill 解析修复。</div>
-  </div>
+        <div class="setting-row">
+          <div class="setting-copy">
+            <b>标记快捷键</b>
+            <span>使用快捷键快速切换标记模式(点击自定义)</span>
+          </div>
+          <button class="shortcut-btn" id="recordShortcut">读取中</button>
+        </div>
 
-  <div class="sec">
-    <div class="sec-t">环境自检</div>
-    <div id="checks"></div>
-    <div class="guide" id="guideFile">
-      <b>当前是 file:// 页面，扩展默认无法注入。</b><br>
-      请开启文件访问权限：
-      <div class="g-btn" id="openSettings">打开本扩展设置 → 开启「允许访问文件网址」</div>
-      或改用本地服务器打开（推荐）：<br>
-      <code id="serveCmd">python3 -m http.server 8000</code> <span class="copy" id="copyCmd">复制</span>
-    </div>
-    <div class="guide" id="guideDead">
-      <b>当前页面未检测到标记器。</b><br>
-      可能原因：页面是 <code>chrome://</code> / 应用商店等受限页，或刚装好扩展需<b>刷新页面</b>。请刷新后重试。
-    </div>
-  </div>
+        <div class="setting-row">
+          <div class="setting-copy">
+            <b>连续标记</b>
+            <span>标记完成后不自动退出标记状态</span>
+          </div>
+          <label class="switch" aria-label="切换连续标记">
+            <input type="checkbox" id="continuousCb">
+            <span class="tk" aria-hidden="true"></span>
+          </label>
+        </div>
 
-  <div class="toast" id="toast"></div>
+        <div class="setting-row">
+          <div class="setting-copy">
+            <b>任何网址均加载</b>
+            <span>默认仅支持本地文件及本地网址</span>
+          </div>
+          <label class="switch" aria-label="切换任何网址均加载">
+            <input type="checkbox" id="allUrlsCb">
+            <span class="tk" aria-hidden="true"></span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="checkTitle">
+      <div class="card-head">
+        <h2 class="sec-t" id="checkTitle">环境自检</h2>
+      </div>
+      <div class="checks" id="checks"></div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="popup.js"></script>
 </body>
 </html>

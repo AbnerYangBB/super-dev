@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "PinSpec",
-  "version": "1.2.0",
+  "version": "1.2.9",
   "description": "通用网页/原型标记器：选中元素添加备注，可视化标记，并导出 JSON / Markdown / AI Prompt 反馈。",
   "permissions": ["storage", "tabs", "scripting"],
   "host_permissions": ["<all_urls>", "file:///*"],
@@ -32,12 +32,6 @@
       "css": ["content.css"]
     }
   ],
-  "commands": {
-    "toggle-mode": {
-      "suggested_key": { "default": "Alt+Shift+M", "mac": "Alt+Shift+M" },
-      "description": "切换标记模式"
-    }
-  },
   "web_accessible_resources": [
     { "resources": ["content.css"], "matches": ["<all_urls>"] }
   ]

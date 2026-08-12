@@ -10,6 +10,7 @@
 ## 1) 能力使用
 
 - 优先使用已经配置的MCP服务, 其次是 skill.
+- `firecrawl-website-design-clone` 依赖本机 Firecrawl CLI（`firecrawl`）与环境变量 `FIRECRAWL_API_KEY`；本仓库只同步 skill 文本，不安装 CLI。使用前请确认 CLI 可用且已配置 key，否则应先说明阻塞原因，不要假装已完成 scrape。
 
 ## 2) 代码检索
 

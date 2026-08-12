@@ -92,6 +92,21 @@
       "applied_tag": null
     },
     {
+      "name": "firecrawl-website-design-clone",
+      "path": "web/firecrawl-website-design-clone",
+      "mode": "tracked",
+      "reason": null,
+      "target": "firecrawl/firecrawl-workflows@firecrawl-website-design-clone",
+      "source": "firecrawl/firecrawl-workflows",
+      "skill": "firecrawl-website-design-clone",
+      "repo_url": "https://github.com/firecrawl/firecrawl-workflows.git",
+      "tracking_ref": "refs/heads/main",
+      "resolved_commit": "1a6b302731139d6de6117d205efd8198d3775cc3",
+      "resolved_tag": null,
+      "applied_commit": "1a6b302731139d6de6117d205efd8198d3775cc3",
+      "applied_tag": null
+    },
+    {
       "name": "frontend-design",
       "path": "design/frontend-design",
       "mode": "tracked",

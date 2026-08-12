@@ -56,3 +56,9 @@ rm -rf "$TMP_DIR"
 ## Update
 
 更新方式与安装完全相同：重复执行本流程即可。
+
+## Runtime Notes
+
+同步只会复制 skill / agent 文件，不会安装外部 CLI。
+
+例如 `firecrawl-website-design-clone` 还需要本机自行准备 Firecrawl CLI 与 `FIRECRAWL_API_KEY`。详见仓库根目录 `README.md` 中「部分 skills 的运行时依赖」。

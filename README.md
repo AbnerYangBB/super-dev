@@ -114,6 +114,30 @@ python3 scripts/sync_skills.py --workspace-root "<你的目标工程目录>"
 
 如果你发现它会覆盖其他目录、穿透符号链接，或会影响业务代码，请不要继续执行，先提 issue 或私下反馈。
 
+## 部分 skills 的运行时依赖
+
+同步本仓库只会复制 skill 说明文件，**不会**安装它们依赖的外部 CLI / API key。
+
+当前需要额外环境才能真正跑起来的 skill：
+
+| Skill | 路径 | 本机需要 |
+| --- | --- | --- |
+| `firecrawl-website-design-clone` | `skills/web/firecrawl-website-design-clone/` | Firecrawl CLI（`firecrawl`）+ `FIRECRAWL_API_KEY` |
+
+本仓库**不负责**安装 Firecrawl CLI。若要使用该 skill，请在目标机器自行准备：
+
+```bash
+# 官方一键初始化（会装 CLI，并可完成登录 / API key）
+npx -y firecrawl-cli@latest init --all --browser
+```
+
+或至少确保：
+
+1. `firecrawl` 命令可用（例如 `npx -y firecrawl-cli@latest` / 全局安装）
+2. 环境变量 `FIRECRAWL_API_KEY` 已配置（见 [Firecrawl 文档](https://docs.firecrawl.dev)）
+
+缺少 CLI 或 API key 时，skill 文件仍可被同步与发现，但执行 scrape / screenshot 步骤会失败。
+
 ## 常见问题
 
 ### 为什么不再区分平台？
